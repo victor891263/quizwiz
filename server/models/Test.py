@@ -27,7 +27,7 @@ class Test(Document):
     questions = ListField(EmbeddedDocumentField(Question))
     responses = ListField(EmbeddedDocumentField(Response))
     comments = ListField(EmbeddedDocumentField(Comment))
-    user = ReferenceField(User, required=True)
+    user = ReferenceField(User)
     liked_users = ListField(ObjectIdField())
     disliked_users = ListField(ObjectIdField())
 
