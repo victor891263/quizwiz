@@ -9,7 +9,7 @@ JWT_SECRET = os.environ['JWT_SECRET']
 
 verify_new_email_blueprint = Blueprint('verify_new_email', __name__)
 
-@verify_new_email_blueprint.route('/verify_account/<string:verification_id>', methods=['GET'])
+@verify_new_email_blueprint.route('/verify_new_email/<string:verification_id>', methods=['GET'])
 @verify_authorization
 def verify_new_email(verification_id):
     authorized_user = request.authorized_user
