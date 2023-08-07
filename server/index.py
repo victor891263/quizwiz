@@ -10,6 +10,7 @@ from flask_mail import Mail
 from routes.users import users_blueprint
 from routes.auth import auth_blueprint
 from routes.verify_account import verify_account_blueprint
+from routes.verify_new_email import verify_new_email_blueprint
 
 # load stuff from env file
 load_dotenv()
@@ -69,4 +70,5 @@ def get_user():
 # register blueprints/routes
 app.register_blueprint(auth_blueprint)
 app.register_blueprint(verify_account_blueprint)
+app.register_blueprint(verify_new_email_blueprint)
 app.register_blueprint(users_blueprint)
