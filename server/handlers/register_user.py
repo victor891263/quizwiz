@@ -34,5 +34,5 @@ def register_user():
     send_email(f'Visit this link to complete the account creation process: {CLIENT_URL}/verify/{random_id}', '[Quizwiz] Verify your email', [user_info['email']])
 
     # create the json web token and send it to the client
-    token = jwt.encode({'_id': str(user.id)}, JWT_SECRET, algorithm='HS256')
+    token = jwt.encode({'_id': str(user.id), 'isVerified': False}, JWT_SECRET, algorithm='HS256')
     return token, 200

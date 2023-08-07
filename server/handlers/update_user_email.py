@@ -2,6 +2,7 @@ import os
 from flask import request
 import secrets
 from dotenv import load_dotenv
+from mongoengine import Q
 from models.User import User, NewEmail
 from utilities.send_email import send_email
 
@@ -14,10 +15,7 @@ def update_user_email():
     authorized_user = request.authorized_user
 
     # check if the email has already been taken and if it has been, don't proceed
-    existing_user = User.objects(email__address=new_email).first()
-    if existing_user is not None:
-        return 'An account with a given email already exists', 400
-    existing_user = User.objects(new_email__address=new_email).first()
+    existing_user = User.objects(Q(email__address=new_email) | Q(new_email__address=new_email)).first()
     if existing_user is not None:
         return 'An account with a given email already exists', 400
 
