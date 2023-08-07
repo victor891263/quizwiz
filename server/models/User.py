@@ -11,7 +11,7 @@ class NewEmail(EmbeddedDocument):
 class User(Document):
     email = EmbeddedDocumentField(Email)
     new_email = EmbeddedDocumentField(NewEmail)
-    password = StringField(required=True, min_length=1, max_length=50)
+    password = StringField(required=True, min_length=1, max_length=100)
     username = StringField(min_length=1, max_length=50)
     name = StringField(min_length=1, max_length=100)
     about = StringField(min_length=1, max_length=500)

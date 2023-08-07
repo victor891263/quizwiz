@@ -4,6 +4,7 @@ from flask_cors import CORS
 import mongoengine
 from dotenv import load_dotenv
 import jwt
+from flask_mail import Mail
 
 # import routes
 from routes.users import users_blueprint
@@ -12,6 +13,8 @@ from routes.users import users_blueprint
 load_dotenv()
 DATABASE_URI = os.environ['DATABASE_URI']
 JWT_SECRET = os.environ['JWT_SECRET']
+SMTP_PASSWORD = os.environ['SMTP_PASSWORD']
+CLIENT_URL = os.environ['CLIENT_URL']
 
 # initialize API
 app = Flask(__name__)
@@ -22,6 +25,15 @@ CORS(app)
 def catch_error(error):
     error_message = str(error) if error.args else 'Unknown error occurred'
     return make_response(error_message, 500)
+
+# Configure email settings
+app.config['MAIL_SERVER'] = 'smtp.gmail.com'
+app.config['MAIL_USERNAME'] = 'autoreply978@gmail.com'
+app.config['MAIL_PASSWORD'] = SMTP_PASSWORD
+app.config['MAIL_PORT'] = 587
+app.config['MAIL_USE_TLS'] = True
+
+mail = Mail(app)
 
 # connect to database
 mongoengine.connect(host=DATABASE_URI)
