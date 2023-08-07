@@ -8,6 +8,8 @@ from flask_mail import Mail
 
 # import routes
 from routes.users import users_blueprint
+from routes.auth import auth_blueprint
+from routes.verify_account import verify_account_blueprint
 
 # load stuff from env file
 load_dotenv()
@@ -54,11 +56,17 @@ def get_user():
     if auth_header and auth_header.startswith('Bearer '):
         token = auth_header.split(' ')[1] # extract the token
         try:
-            request.authorized_user = jwt.decode(token, JWT_SECRET, algorithms=['HS256'])
+            user_info = jwt.decode(token, JWT_SECRET, algorithms=['HS256'])
+            if user_info.isVerified:
+                request.authorized_user = user_info
+            else:
+                request.unauthorized_user = user_info
         except jwt.ExpiredSignatureError:
             return 'Session expired', 401
         except jwt.InvalidTokenError:
             return 'Invalid token', 401
 
 # register blueprints/routes
+app.register_blueprint(auth_blueprint)
+app.register_blueprint(verify_account_blueprint)
 app.register_blueprint(users_blueprint)
