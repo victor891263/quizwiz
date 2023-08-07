@@ -8,6 +8,7 @@ from handlers.register_user import register_user
 from handlers.get_user import get_user
 from handlers.update_user import update_user
 from handlers.update_user_email import update_user_email
+from handlers.update_user_password import update_user_password
 from handlers.delete_user import delete_user
 
 # load stuff from env file
@@ -38,6 +39,12 @@ def update_user_wrapper():
 @verify_authorization
 def update_user_email_wrapper():
     return update_user_email()
+
+# update authorized user's password
+@users_blueprint.route('/users/password', methods=['PUT'])
+@verify_authorization
+def update_user_password_wrapper():
+    return update_user_password()
 
 # delete authorized user's profile
 @users_blueprint.route('/users', methods=['DELETE'])
