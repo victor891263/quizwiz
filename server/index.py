@@ -42,13 +42,6 @@ mail = Mail(app)
 # connect to database
 mongoengine.connect(host=DATABASE_URI)
 
-# disconnect from database if API stops running
-@app.teardown_appcontext
-def disconnect_db(error):
-    mongoengine.disconnect()
-    if error:
-        print(error)
-
 # execute this before every request is handled
 @app.before_request
 def get_user():
@@ -74,3 +67,12 @@ app.register_blueprint(verify_account_blueprint)
 app.register_blueprint(verify_new_email_blueprint)
 app.register_blueprint(recover_account_blueprint)
 app.register_blueprint(users_blueprint)
+
+'''
+# disconnect from database if API stops running
+@app.teardown_appcontext
+def disconnect_db(error):
+    mongoengine.disconnect()
+    if error:
+        print(error)
+'''

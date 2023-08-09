@@ -1,4 +1,5 @@
 from flask import request
+from datetime import datetime
 from models.User import User
 
 def update_user():
@@ -7,5 +8,5 @@ def update_user():
 
     # update the specified user
     user = User.objects(id=authorized_user['_id']).first()
-    user.update(**new_user_info)
+    user.update(**new_user_info, updated_on=datetime.now())
     return '', 200

@@ -1,4 +1,5 @@
-from mongoengine import Document, EmbeddedDocument, StringField, BooleanField, ListField, EmbeddedDocumentField, ReferenceField, ObjectIdField
+from datetime import datetime
+from mongoengine import Document, EmbeddedDocument, StringField, BooleanField, ListField, EmbeddedDocumentField, ReferenceField, ObjectIdField, DateTimeField
 from .User import User
 
 class Option(EmbeddedDocument):
@@ -30,6 +31,8 @@ class Test(Document):
     user = ReferenceField(User)
     liked_users = ListField(ObjectIdField())
     disliked_users = ListField(ObjectIdField())
+    created_on = DateTimeField(default=datetime.now())
+    updated_on = DateTimeField(default=datetime.now())
 
 
 """

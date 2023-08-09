@@ -1,5 +1,6 @@
 import bcrypt
 from flask import request
+from datetime import datetime
 from models.User import User
 
 def update_user_password():
@@ -18,6 +19,6 @@ def update_user_password():
 
     # update the password
     user.password = hashed_new_password
+    user.updated_on = datetime.now()
     user.save()
-
     return '', 200

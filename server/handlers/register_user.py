@@ -4,7 +4,7 @@ import bcrypt
 import secrets
 import jwt
 from dotenv import load_dotenv
-from models.User import User, Email
+from models.User import User
 from utilities.send_email import send_email
 
 # load stuff from env file
@@ -28,7 +28,7 @@ def register_user():
     random_id = secrets.token_hex(32)
 
     # add user to database
-    user = User(email=Email(address=user_info['email'], token=random_id), password=hashed_password).save()
+    user = User(email={'address': user_info['email'], 'token': random_id}, password=hashed_password).save()
 
     # send a verification email to the provided email address
     send_email(f'Visit this link to complete the account creation process: {CLIENT_URL}/verify/{random_id}', '[Quizwiz] Verify your email', [user_info['email']])

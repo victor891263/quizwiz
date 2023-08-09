@@ -1,4 +1,5 @@
-from mongoengine import Document, EmbeddedDocument, StringField, EmailField, EmbeddedDocumentField, URLField
+from mongoengine import Document, EmbeddedDocument, StringField, EmailField, EmbeddedDocumentField, URLField,DateTimeField
+from datetime import datetime
 
 class Email(EmbeddedDocument):
     address = EmailField(required=True, max_length=50)
@@ -18,3 +19,5 @@ class User(Document):
     img = URLField(min_length=1, max_length=500)
     link = URLField(min_length=1, max_length=100)
     recovery_token = StringField()
+    created_on = DateTimeField(default=datetime.now())
+    updated_on = DateTimeField(default=datetime.now())

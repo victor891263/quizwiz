@@ -1,6 +1,7 @@
 import os
 from dotenv import load_dotenv
 from flask import request, Blueprint
+from datetime import datetime
 from models.User import User
 from decorators.verify_authorization import verify_authorization
 
@@ -23,6 +24,7 @@ def verify_new_email(verification_id):
     user.email.address = user.new_email.address
     user.new_email.address = None
     user.new_email.token = None
+    user.updated_on = datetime.now()
 
     # save changes
     user.save()
