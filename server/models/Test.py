@@ -19,12 +19,15 @@ class Response(EmbeddedDocument):
     user = ReferenceField(User, required=True)
     answers = ListField(EmbeddedDocumentField(Answer))
     total_elapsed_time = IntField(max_value=3600, min_value=1)
+    created_on = DateTimeField(default=datetime.now())
 
 class Comment(EmbeddedDocument):
     user = ReferenceField(User, required=True)
     body = StringField(required=True, max_length=500)
     liked_users = ListField(ReferenceField(User))
     disliked_users = ListField(ReferenceField(User))
+    created_on = DateTimeField(default=datetime.now())
+    updated_on = DateTimeField(default=datetime.now())
 
 class TimeLimit(EmbeddedDocument):
     time_limit = IntField(max_value=60, min_value=1)
