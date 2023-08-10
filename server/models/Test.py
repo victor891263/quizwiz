@@ -1,5 +1,5 @@
 from datetime import datetime
-from mongoengine import Document, EmbeddedDocument, StringField, BooleanField, ListField, EmbeddedDocumentField, ReferenceField, ObjectIdField, DateTimeField
+from mongoengine import Document, EmbeddedDocument, StringField, IntField, BooleanField, ListField, EmbeddedDocumentField, ReferenceField, ObjectIdField, DateTimeField
 from .User import User
 
 class Option(EmbeddedDocument):
@@ -13,16 +13,22 @@ class Question(EmbeddedDocument):
 class Answer(EmbeddedDocument):
     question_id = ObjectIdField(required=True)
     choice_ids = ListField(ObjectIdField())
+    elapsed_time = IntField(max_value=3600, min_value=1)
 
 class Response(EmbeddedDocument):
     user = ReferenceField(User, required=True)
     answers = ListField(EmbeddedDocumentField(Answer))
+    total_elapsed_time = IntField(max_value=3600, min_value=1)
 
 class Comment(EmbeddedDocument):
     user = ReferenceField(User, required=True)
     body = StringField(required=True, max_length=500)
     liked_users = ListField(ReferenceField(User))
     disliked_users = ListField(ReferenceField(User))
+
+class TimeLimit(EmbeddedDocument):
+    time_limit = IntField(max_value=60, min_value=1)
+    apply_individually = BooleanField()
 
 class Test(Document):
     questions = ListField(EmbeddedDocumentField(Question))
@@ -31,75 +37,8 @@ class Test(Document):
     user = ReferenceField(User)
     liked_users = ListField(ObjectIdField())
     disliked_users = ListField(ObjectIdField())
+    tags = ListField(StringField(max_length=100))
+    title = StringField(required=True, max_length=250)
+    description = StringField(required=True, max_length=1000)
     created_on = DateTimeField(default=datetime.now())
     updated_on = DateTimeField(default=datetime.now())
-
-
-"""
-pipeline = [
-    {
-        "$lookup": {
-            "from": "user",
-            "localField": "user",
-            "foreignField": "_id",
-            "as": "user"
-        }
-    },
-    {
-        "$unwind": "$user"
-    },
-    {
-        "$unwind": "$comments"
-    },
-    {
-        "$lookup": {
-            "from": "user",
-            "localField": "comments.user",
-            "foreignField": "_id",
-            "as": "comments.user"
-        }
-    },
-    {
-        "$unwind": "$comments.user"
-    },
-    {
-        "$project": {
-            "_id": 1,
-            "user": {
-                "_id": 1,
-                "email": "$user.email"
-            },
-            "questions": 1,
-            "responses": 1,
-            "liked_users": 1,
-            "disliked_users": 1,
-            "comments": {
-                "body": "$comments.body",
-                "user": {
-                    "_id": 1,
-                    "email": "$comments.user.email"
-                },
-                "liked_users": 1,
-                "disliked_users": 1
-            }
-        }
-    },
-    {
-        "$group": {
-            "_id": "$_id",
-            "user": {"$first": "$user"},
-            "questions": {"$first": "$questions"},
-            "responses": {"$first": "$responses"},
-            "liked_users": {"$first": "$liked_users"},
-            "disliked_users": {"$first": "$disliked_users"},
-            "comments": {"$push": "$comments"}
-        }
-    }
-]
-
-try:
-    test = Test.objects(id='64c92c6df5bb70561b9abf69').aggregate(*pipeline)
-    print(list(test))
-except Exception as e:
-    print(e)
-"""
