@@ -28,7 +28,7 @@ def register_user():
     random_id = secrets.token_hex(32)
 
     # add user to database
-    user = User(email={'address': user_info['email'], 'token': random_id}, password=hashed_password).save()
+    user = User(email={'address': user_info['email'], 'token': random_id}, password=hashed_password, new_email={'address': None, 'token': None}).save()
 
     # send a verification email to the provided email address
     send_email(f'Visit this link to complete the account creation process: {CLIENT_URL}/verify/{random_id}', '[Quizwiz] Verify your email', [user_info['email']])

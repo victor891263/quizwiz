@@ -2,10 +2,12 @@ import {useState, useEffect} from "react"
 import { Link, useNavigate } from "react-router-dom"
 import Joi from 'joi'
 import CheckIcon from "../icons/CheckIcon"
-import axios from "axios";
-import PopUp from "../components/PopUp";
-import handleAxiosError from "../utilities/handleAxiosError";
-import Spinner from "../components/Spinner";
+import axios from "axios"
+import PopUp from "../components/PopUp"
+import handleAxiosError from "../utilities/handleAxiosError"
+import Spinner from "../components/Spinner"
+import CrossIcon from "../icons/CrossIcon"
+import ButtonWithSpinner from "../components/ButtonWithSpinner";
 
 export default function Auth({ type }: { type: 'login' | 'register' }) {
     const loginSchema = Joi.object({
@@ -26,6 +28,8 @@ export default function Auth({ type }: { type: 'login' | 'register' }) {
     const [isLoading, setIsLoading] = useState(false)
 
     useEffect(() => {
+        setEmail('')
+        setPassword('')
         setErrors({
             email: '',
             password: ''
@@ -34,17 +38,16 @@ export default function Auth({ type }: { type: 'login' | 'register' }) {
 
     function handleSubmit(e: any) {
         e.preventDefault()
+        const newErrors = {
+            email: '',
+            password: ''
+        }
         const { error } = loginSchema.validate({ email, password, rememberMe }, { abortEarly: false })
         if (error) {
-            const newErrors = {
-                email: '',
-                password: ''
-            }
             error.details.forEach((detail) => {
                 // @ts-ignore
                 newErrors[detail.context.key] = detail.message.replace(/"/g, '')
             })
-            setErrors(newErrors)
         } else {
             setIsLoading(true)
             axios.post(`${process.env.REACT_APP_API_URL}/auth`, { email, password })
@@ -56,35 +59,36 @@ export default function Auth({ type }: { type: 'login' | 'register' }) {
                     setIsLoading(false)
                 })
         }
+        setErrors(newErrors)
     }
 
     return (
         <>
-            {submissionError && <PopUp msg={submissionError} color='red' />}
+            <PopUp isVisible={!!submissionError} msg={submissionError} color='red' />
             <div className='flex min-h-screen px-6'>
                 <div className='m-auto container max-w-sm py-20'>
                     <div>
-                        <h1 className='text-2xl tracking-[-.015em]'>{ type === 'login' ? 'Welcome back!': 'Join Flavorverse' }</h1>
-                        {type === 'login' && <span className="block mt-3 leading-6">Not a member? <Link to='/register' className="text-green-600 font-medium">Join quizwiz</Link></span>}
-                        {type === 'register' && <span className="block mt-3 leading-6">Already have an account? <Link to='/login' className="text-lime-600 font-medium">Login</Link></span>}
+                        <h1 className='text-2xl tracking-[-.015em]'>{ type === 'login' ? 'Welcome back!': 'Join Quizwiz' }</h1>
+                        {type === 'login' && <span className="block mt-3 leading-6">Not a member? <Link to='/register' className="underline">Join quizwiz</Link></span>}
+                        {type === 'register' && <span className="block mt-3 leading-6">Already have an account? <Link to='/login' className="underline">Login</Link></span>}
                     </div>
                     <form className='mt-10 space-y-5' onSubmit={handleSubmit}>
-                        <div className='relative'>
-                            <label htmlFor='email' className='absolute top-2 left-3 text-sm text-slate-400'>Email</label>
-                            <input type='text' name='email' id='email' className='w-full' value={email} onChange={e => setEmail(e.target.value)} />
+                        <div>
+                            <label htmlFor='email' className='text-sm'>Email</label>
+                            <input type='text' name='email' id='email' className='mt-2 w-full' value={email} onChange={e => setEmail(e.target.value)} />
                             {errors.email && (
                                 <div className='mt-2 text-red-600 flex items-center space-x-1'>
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-[18px] h-[18px]"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+                                    <CrossIcon className='h-5 w-5' />
                                     <div className="text-sm first-letter:capitalize">{errors.email}</div>
                                 </div>
                             )}
                         </div>
-                        <div className='relative'>
-                            <label htmlFor='password' className='absolute top-2 left-3 text-sm text-slate-400'>Password</label>
-                            <input type='password' name='password' id='password' className='w-full' value={password} onChange={e => setPassword(e.target.value)} />
+                        <div>
+                            <label htmlFor='password' className='text-sm'>Password</label>
+                            <input type='password' name='password' id='password' className='mt-2 w-full' value={password} onChange={e => setPassword(e.target.value)} />
                             {errors.password && (
                                 <div className="mt-2 text-red-600 flex items-center space-x-1">
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-[18px] h-[18px]"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+                                    <CrossIcon className='h-5 w-5' />
                                     <div className="text-sm first-letter:capitalize">{errors.password}</div>
                                 </div>
                             )}
@@ -92,23 +96,18 @@ export default function Auth({ type }: { type: 'login' | 'register' }) {
                         {type === 'login' && (
                             <div className='flex items-center justify-between text-sm py-1'>
                                 <div onClick={() => setRememberMe(!rememberMe)} className='flex items-center space-x-2 cursor-pointer'>
-                                    <div className={'h-4 w-4 pt-0.5 rounded ring-1 ring-slate-300 flex items-center justify-center' + (rememberMe ? ' bg-lime-600 !ring-lime-600 text-white' : '')}>
+                                    <div className={'h-4 w-4 ring-1 ring-slate-300 flex items-center justify-center' + (rememberMe ? ' bg-slate-900 !ring-slate-900 text-white' : '')}>
                                         <CheckIcon className='w-3 h-3 text-white' />
                                     </div>
                                     <div>Remember me</div>
                                 </div>
-                                <Link to='/recover' className="text-green-600 font-medium">Forgot password?</Link>
+                                <Link to='/recover' className="underline">Forgot password?</Link>
                             </div>
                         )}
                         {isLoading ? (
-                            <div className='relative bg-lime-600 rounded-lg py-2 px-3 w-full opacity-80 cursor-disabled'>
-                                <div className='absolute top-0 left-0 w-full h-full flex items-center justify-center'>
-                                    <Spinner className='h-5 w-5 text-white' />
-                                </div>
-                                <div className='opacity-0'>Login</div>
-                            </div>
+                            <ButtonWithSpinner type='primary' className={type === 'register' ? '!mt-7' : ''} />
                         ):(
-                            <input type='submit' className='w-full' value={type === 'login' ? 'Login' : 'Create account'} />
+                            <input type='submit' className={'w-full ' + (type === 'register' ? '!mt-7' : '')} value={type === 'login' ? 'Login' : 'Create account'} />
                         )}
                     </form>
                 </div>

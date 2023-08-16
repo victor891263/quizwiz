@@ -1,7 +1,7 @@
 from models.User import User
 
 def get_user(id):
-    user = User.objects(id=id).exclude('password').first()
+    user = User.objects(id=id).exclude('password', 'email__token', 'new_email__token').first()
 
     # send error message if user doesn't exist
     if not user:

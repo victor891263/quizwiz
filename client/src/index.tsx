@@ -6,6 +6,7 @@ import ErrorPage from './errorPage'
 import Home from './routes/home'
 import Auth from './routes/auth'
 import reportWebVitals from './reportWebVitals'
+import Profile from "./routes/profile"
 
 const router = createBrowserRouter([
     {
@@ -20,6 +21,10 @@ const router = createBrowserRouter([
     {
         path: '/register',
         element: <Auth type='register' />
+    },
+    {
+        path: '/users/:id',
+        element: <Profile />
     }
 ])
 
