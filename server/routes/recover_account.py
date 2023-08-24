@@ -29,12 +29,12 @@ def send_recovery_instructions():
     user.recovery_token = random_id
 
     # send the recovery instructions
-    send_email(f'Visit this link to reset your password and recover your account: {CLIENT_URL}/recover/{random_id}','[Quizwiz] Recover your account', user.email.address)
+    send_email(f'Visit this link to reset your password and recover your account: {CLIENT_URL}/reset/{random_id}','[Quizwiz] Recover your account', user.email.address)
 
     return '', 200
 
 # user resets their password
-@recover_account_blueprint.route('/recover/<string:recovery_id>', methods=['PUT'])
+@recover_account_blueprint.route('/reset/<string:recovery_id>', methods=['PUT'])
 def reset_password(recovery_id):
     new_password = request.get_json()
 

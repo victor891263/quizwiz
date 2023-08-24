@@ -10,7 +10,7 @@ JWT_SECRET = os.environ['JWT_SECRET']
 
 auth_blueprint = Blueprint('auth', __name__)
 
-@auth_blueprint.route('/auth', methods=['GET'])
+@auth_blueprint.route('/auth', methods=['POST'])
 def authorize():
     user_info = request.get_json()
 

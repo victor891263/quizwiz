@@ -2,8 +2,12 @@ from flask import Blueprint
 from decorators.verify_authorization import verify_authorization
 
 # import handlers
+from handlers.get_test_with_questions import get_test_with_questions
+from handlers.get_test_with_questions_and_responses import get_test_with_questions_and_responses
+from handlers.get_test_with_single_response import get_test_with_single_response
 from handlers.get_test import get_test
 from handlers.get_tests import get_tests
+from handlers.submit_response import submit_response
 from handlers.add_test import add_test
 from handlers.update_test import update_test
 from handlers.delete_test import delete_test
@@ -12,8 +16,37 @@ from handlers.update_comment import update_comment
 from handlers.delete_comment import delete_comment
 from handlers.react_test import react_test
 from handlers.react_comment import react_comment
+from handlers.add_user_to_blocked_list import add_user_to_blocked_list
 
 tests_blueprint = Blueprint('tests', __name__)
+
+
+# get a test with questions only
+@tests_blueprint.route('/tests/<string:id>/questions', methods=['GET'])
+def get_test_with_questions(id):
+    return get_test_with_questions(id)
+
+# get a test with questions but only a single response
+@tests_blueprint.route('/tests/<string:id>/answer', methods=['GET'])
+@verify_authorization
+def get_test_with_single_response_wrapper(id):
+    return get_test_with_single_response(id)
+
+# get a test with questions and responses
+@tests_blueprint.route('/tests/<string:id>/responses', methods=['GET'])
+@verify_authorization
+def get_test_with_questions_and_responses_wrapper(id):
+    return get_test_with_questions_and_responses(id)
+
+# submit a response to a test
+@tests_blueprint.route('/tests/<string:id>/responses', methods=['PUT'])
+def submit_response_wrapper(id):
+    return submit_response(id)
+
+# add a user to the block list if the user failed to submit the response in time
+@tests_blueprint.route('/tests/<string:id>/expired', methods=['PUT'])
+def add_user_to_blocked_list(id):
+    return add_user_to_blocked_list(id)
 
 # get a test
 @tests_blueprint.route('/tests/<string:id>', methods=['GET'])

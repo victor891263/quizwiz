@@ -7,11 +7,8 @@ import axios from "axios";
 import handleAxiosError from "../utilities/handleAxiosError"
 import getToken from "../utilities/getToken"
 import CrossIcon from "../icons/CrossIcon"
-import ButtonWithSpinner from "./ButtonWithSpinner"
-import MailIcon from "../icons/MailIcon";
-import ButtonWithLoader from "./ButtonWithLoader";
-import {Simulate} from "react-dom/test-utils";
-import error = Simulate.error;
+import MailIcon from "../icons/MailIcon"
+import Spinner from "../icons/Spinner"
 
 type Props = {
     profile: User
@@ -217,7 +214,7 @@ export default function EditProfile({ profile, updateDetails, updateNewEmail, se
             <h2 className='subtitle'>Edit profile</h2>
             <div className='text-slate-400 flex'>
                 {['details', 'email', 'password', 'misc'].map(item => (
-                    <button onClick={() => setShowing(item as ('details' | 'email' | 'password' | 'misc'))} className={'px-4 py-2.5 border-b capitalize ' + (showing === item ? 'border-slate-900 text-slate-900' : '')}>{item}</button>
+                    <button onClick={() => setShowing(item as ('details' | 'email' | 'password' | 'misc'))} className={'px-4 py-2.5 rounded-none border-b capitalize ' + (showing === item ? 'border-slate-900 text-slate-900' : '')}>{item}</button>
                 ))}
                 <div className='border-b w-full'></div>
             </div>
@@ -243,9 +240,14 @@ export default function EditProfile({ profile, updateDetails, updateNewEmail, se
                         </div>
                     ))}
                     <div className='!mt-10'>
-                        <ButtonWithLoader onClick={submitDetails} isOver={!!(operationError || operationSuccess)} type='light' >
-                            <button className='primary disabled:text-transparent'>Save changes</button>
-                        </ButtonWithLoader>
+                        <button onClick={submitDetails} disabled={isLoading} className='relative primary disabled:text-transparent'>
+                            <span>Save changes</span>
+                            {isLoading && (
+                                <div className='absolute top-0 left-0 h-full w-full flex items-center justify-center'>
+                                    <Spinner className='h-5 w-5 border-[3px] text-white' />
+                                </div>
+                            )}
+                        </button>
                     </div>
                 </>
             )}
@@ -256,12 +258,17 @@ export default function EditProfile({ profile, updateDetails, updateNewEmail, se
                         <input disabled={true} className='mt-2 w-full' type='text' name='currentEmail' id='currentEmail' value={currentEmail} onChange={e => setCurrentEmail(e.target.value)} />
                     </div>
                     {profile.new_email.address ? (
-                        <div className='border p-6 space-y-4 flex flex-col items-center text-center'>
+                        <div className='border rounded-lg p-6 space-y-4 flex flex-col items-center text-center'>
                             <MailIcon className='h-8 w-8' />
                             <p>Follow the instructions sent to {profile.new_email.address} to finish updating. You can revert the change to nullify this process.</p>
-                            <ButtonWithLoader onClick={cancelEmailUpdate} isOver={!!(operationError || operationSuccess)} type='dark' >
-                                <button className='secondary disabled:text-transparent'>I don't want to update anymore</button>
-                            </ButtonWithLoader>
+                            <button onClick={cancelEmailUpdate} disabled={isLoading} className='relative secondary disabled:text-transparent'>
+                                <span>I don't want to update anymore</span>
+                                {isLoading && (
+                                    <div className='absolute top-0 left-0 h-full w-full flex items-center justify-center'>
+                                        <Spinner className='h-5 w-5 border-[3px] text-indigo-600' />
+                                    </div>
+                                )}
+                            </button>
                         </div>
                     ):(
                         <>
@@ -276,9 +283,14 @@ export default function EditProfile({ profile, updateDetails, updateNewEmail, se
                                 )}
                             </div>
                             <div className='!mt-10'>
-                                <ButtonWithLoader onClick={submitEmail} isOver={!!(operationError || operationSuccess)} type='light' >
-                                    <button className='primary disabled:text-transparent'>Update email</button>
-                                </ButtonWithLoader>
+                                <button onClick={submitEmail} disabled={isLoading} className='relative primary disabled:text-transparent'>
+                                    <span>Update email</span>
+                                    {isLoading && (
+                                        <div className='absolute top-0 left-0 h-full w-full flex items-center justify-center'>
+                                            <Spinner className='h-5 w-5 border-[3px] text-white' />
+                                        </div>
+                                    )}
+                                </button>
                             </div>
                         </>
                     )}
@@ -307,9 +319,14 @@ export default function EditProfile({ profile, updateDetails, updateNewEmail, se
                         )}
                     </div>
                     <div className='!mt-10'>
-                        <ButtonWithLoader onClick={submitPassword} isOver={!!(operationError || operationSuccess)} type='light' >
-                            <button className='primary disabled:text-transparent'>Update password</button>
-                        </ButtonWithLoader>
+                        <button onClick={submitPassword} disabled={isLoading} className='relative primary disabled:text-transparent'>
+                            <span>Update password</span>
+                            {isLoading && (
+                                <div className='absolute top-0 left-0 h-full w-full flex items-center justify-center'>
+                                    <Spinner className='h-5 w-5 border-[3px] text-white' />
+                                </div>
+                            )}
+                        </button>
                     </div>
                 </>
             )}
@@ -319,9 +336,14 @@ export default function EditProfile({ profile, updateDetails, updateNewEmail, se
                         <h3 className='mb-3 text-lg font-semibold'>Leaving Quizwiz?</h3>
                         <p>All quizzes, answers, and comments attributed to this account will be deleted permanently. This action is not reversible.</p>
                     </div>
-                    <ButtonWithLoader onClick={submitPassword} isOver={!!(operationError || operationSuccess)} type='light' >
-                        <button className='danger disabled:text-transparent'>Delete my account</button>
-                    </ButtonWithLoader>
+                    <button onClick={deleteProfile} disabled={isLoading} className='relative primary disabled:text-transparent'>
+                        <span>Delete my account</span>
+                        {isLoading && (
+                            <div className='absolute top-0 left-0 h-full w-full flex items-center justify-center'>
+                                <Spinner className='h-5 w-5 border-[3px] text-white' />
+                            </div>
+                        )}
+                    </button>
                 </>
             )}
         </div>

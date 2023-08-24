@@ -30,7 +30,8 @@ def get_tests():
                 "tags": 1,
                 "user": {
                     "_id": "$user._id",
-                    "name": "$user.name"
+                    "username": "$user.username",
+                    "img": "$user.img"
                 },
                 "questions": {"$size": "$questions"},
                 "responses": {"$size": "$responses"},

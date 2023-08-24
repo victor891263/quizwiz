@@ -1,11 +1,11 @@
-import Spinner from "./Spinner"
+import Spinner from "../icons/Spinner"
 
 export default function GenericLoadingScreen() {
     return (
         <div className='flex items-center justify-center min-h-screen px-6'>
-            <div>
-                <Spinner className='h-10 w-10 text-cyan-600 mx-auto' />
-                <div className='mt-5 text-xl font-semibold'>Working...</div>
+            <div className='flex flex-col items-center'>
+                <Spinner className='h-9 w-9 border-4 text-indigo-600' />
+                <div className='mt-5 subtitle'>Working...</div>
             </div>
         </div>
     )

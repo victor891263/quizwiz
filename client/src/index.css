@@ -8,25 +8,29 @@
         -moz-osx-font-smoothing: grayscale;
     }
 
-    input, textarea {
-        @apply outline-0
+    input, textarea, button {
+        outline: none;
     }
 
     p {
-        line-height: 1.7;
+        line-height: 1.65;
     }
 }
 
 @layer utilities {
+    .text-sm {
+        @apply tracking-[0.01em]
+    }
+
     h1 {
         @apply font-bold text-slate-900
     }
 
-    input[type='password'],
-    input[type='email'],
-    input[type='text'],
-    textarea {
-        @apply ring-1 ring-slate-300 py-2 px-3 focus:ring-slate-600
+    input[type='password']:not(.no-style),
+    input[type='email']:not(.no-style),
+    input[type='text']:not(.no-style),
+    textarea:not(.no-style) {
+        @apply ring-1 ring-slate-300 rounded-md py-2 px-3 focus:ring-indigo-600
     }
 
     input[type='password']:disabled,
@@ -37,34 +41,43 @@
     }
 
     input[type='submit'] {
-        @apply cursor-pointer bg-slate-900 text-white font-medium text-[15px] py-2 px-3 hover:bg-slate-700 focus:bg-yellow-200 focus:text-black
+        @apply cursor-pointer rounded-md bg-slate-900 text-white font-medium text-[15px] py-2 px-3 hover:bg-slate-700 focus:bg-yellow-200 focus:text-black
     }
 
     textarea {
-        @apply flex resize-none overflow-hidden leading-[1.7]
+        @apply flex resize-none overflow-hidden leading-[1.65]
     }
 
-    button {
-        @apply font-medium text-[15px] py-2 px-3 outline-none
+    button.primary,
+    button.secondary,
+    button.danger,
+    a.primary,
+    a.secondary,
+    a.danger {
+        @apply font-medium text-[15px] py-2 px-3 rounded-md outline-2 outline-offset-[3px] outline-indigo-400 focus:outline
     }
 
-    button.primary {
-        @apply bg-slate-900 text-white hover:bg-slate-700 focus:bg-yellow-200 focus:text-black
+    button.primary,
+    a.primary {
+        @apply bg-indigo-600 text-white hover:bg-indigo-700 disabled:bg-indigo-500 disabled:hover:bg-indigo-500
     }
 
-    button.secondary {
-        @apply bg-slate-100 hover:bg-slate-200 focus:bg-yellow-200 focus:text-black
+    button.secondary,
+    a.secondary {
+        @apply ring-1 ring-slate-300 hover:bg-slate-100 disabled:bg-slate-100 disabled:text-slate-400
     }
 
-    button.danger {
+    button.danger,
+    a.danger {
         @apply bg-red-600 text-white hover:bg-red-700
     }
 
-    button:disabled {
-        @apply opacity-80 cursor-not-allowed
+    button:disabled,
+    a:disabled {
+        @apply  cursor-not-allowed
     }
 }
 
 .subtitle {
-    @apply text-xl font-bold tracking-[-0.01em]
+    @apply text-xl font-bold tracking-[-0.015em]
 }

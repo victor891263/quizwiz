@@ -12,13 +12,12 @@ class Question(EmbeddedDocument):
 
 class Answer(EmbeddedDocument):
     question_id = ObjectIdField(required=True)
-    choice_ids = ListField(ObjectIdField())
-    elapsed_time = IntField(max_value=3600, min_value=1)
+    choice_id = ObjectIdField(required=True)
 
 class Response(EmbeddedDocument):
     user = ReferenceField(User, required=True)
     answers = ListField(EmbeddedDocumentField(Answer))
-    total_elapsed_time = IntField(max_value=3600, min_value=1)
+    elapsed_time = IntField(max_value=3600, min_value=1)
     created_on = DateTimeField(default=datetime.now())
 
 class Comment(EmbeddedDocument):
@@ -29,14 +28,12 @@ class Comment(EmbeddedDocument):
     created_on = DateTimeField(default=datetime.now())
     updated_on = DateTimeField(default=datetime.now())
 
-class TimeLimit(EmbeddedDocument):
-    time_limit = IntField(max_value=60, min_value=1)
-    apply_individually = BooleanField()
-
 class Test(Document):
     questions = ListField(EmbeddedDocumentField(Question))
     responses = ListField(EmbeddedDocumentField(Response))
     comments = ListField(EmbeddedDocumentField(Comment))
+    time_limit = IntField(max_value=60, min_value=1)
+    blocked_users = ListField(ObjectIdField())
     user = ReferenceField(User)
     liked_users = ListField(ObjectIdField())
     disliked_users = ListField(ObjectIdField())
