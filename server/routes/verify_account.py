@@ -13,8 +13,12 @@ verify_account_blueprint = Blueprint('verify_account', __name__)
 def verify_account(verification_id):
     unauthorized_user = getattr(request, 'unauthorized_user', None)
 
-    # check if this user is already verified
+    # check if there is a token
     if not unauthorized_user:
+        return 'Only logged in users can access this page', 400
+
+    # check if this user is already verified
+    if unauthorized_user['isVerified']:
         return 'Your account has already been verified', 400
 
     # check if the account with given id and verification id exists

@@ -11,7 +11,7 @@ load_dotenv()
 CLIENT_URL = os.environ['CLIENT_URL']
 
 def update_user_email():
-    new_email = request.get_json()
+    new_email = request.get_json()['newEmail']
     authorized_user = request.authorized_user
 
     # check if the email has already been taken and if it has been, don't proceed
@@ -27,7 +27,11 @@ def update_user_email():
     user.new_email = NewEmail(address=new_email, token=random_id)
     user.save()
 
+    print(new_email)
+
     # send a verification email to the provided email address
-    send_email(f'Visit this link to finish updating your email: {CLIENT_URL}/verify/{random_id}?mail=true', '[Quizwiz] Verify your new email', new_email)
+    send_email(f'Visit this link to finish updating your email: {CLIENT_URL}/verify/{random_id}?mail=true', '[Quizwiz] Verify your new email', [new_email])
+
+    print('mail success')
 
     return '', 200

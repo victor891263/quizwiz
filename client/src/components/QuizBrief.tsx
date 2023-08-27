@@ -26,15 +26,15 @@ export default function QuizBriefComponent({quiz}: {quiz: QuizBrief}) {
                     <div className='text-slate-400 text-sm'>{getTimeLabel(quiz.created_on)}</div>
                 </div>
 
-                <div className='text-lg font-bold'>{quiz.title}</div>
+                <div className='text-xl font-bold tracking-[0]'>{quiz.title}</div>
                 <div className='flex gap-x-4 text-sm italic'>
                     <div><span className='font-semibold'>{quiz.questions}</span> questions</div>
                     <div><span className='font-semibold'>{quiz.responses}</span> responses</div>
                 </div>
                 <p className='line-clamp-2'>{quiz.description}</p>
-                <div className='py-1 flex flex-wrap gap-2 text-sm'>
+                <div className='py-1 flex flex-wrap gap-1.5 text-sm'>
                     {quiz.tags.map((tag, index) => (
-                        <div className='bg-slate-100 rounded-md py-1.5 px-2.5 text-slate-500 uppercase' key={index}>{tag}</div>
+                        <div className='border border-slate-300 rounded py-1.5 px-2.5 text-slate-400 uppercase' key={index}>{tag}</div>
                     ))}
                 </div>
             </div>

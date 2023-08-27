@@ -20,7 +20,7 @@ def authorize():
         return 'No account found with this email', 400
 
     # check if the given password matches with the one in the database. If it doesn't, don't proceed
-    is_password_valid = bcrypt.checkpw(user_info['password'], user.password)
+    is_password_valid = bcrypt.checkpw(user_info['password'].encode('utf-8'), user.password.encode('utf-8'))
     if not is_password_valid:
         return 'Wrong password', 400
 

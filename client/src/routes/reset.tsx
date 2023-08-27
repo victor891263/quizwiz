@@ -25,7 +25,7 @@ export default function Reset() {
             return
         }
         setIsLoading(true)
-        axios.put(`${process.env.REACT_APP_API_URL}/reset/${resetId}`, password)
+        axios.put(`${process.env.REACT_APP_API_URL}/reset/${resetId}`, {password})
             .then(() => {
                 setSuccessMsg('Your password has been successfully updated')
                 setTimeout(() => setSuccessMsg(''), 3000)

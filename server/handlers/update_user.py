@@ -8,5 +8,5 @@ def update_user():
 
     # update the specified user
     user = User.objects(id=authorized_user['_id']).first()
-    user.update(**new_user_info, updated_on=datetime.now())
+    user.update(**new_user_info)
     return '', 200

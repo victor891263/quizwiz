@@ -5,6 +5,7 @@ import handleAxiosError from "../utilities/handleAxiosError"
 import GenericError from "../components/GenericError"
 import GenericLoadingScreen from "../components/GenericLoadingScreen"
 import CheckWithCircle from "../icons/CheckWithCircle"
+import getToken from "../utilities/getToken";
 
 export default function VerifyAccount() {
     const [retrievalError, setRetrievalError] = useState('')
@@ -14,7 +15,7 @@ export default function VerifyAccount() {
     const [searchParams, setSearchParams] = useSearchParams()
 
     useEffect(() => {
-        axios.get(`${process.env.REACT_APP_API_URL}/${searchParams.get('mail') ? 'verify_new_email' : 'verify_account'}/${verificationId}`)
+        axios.get(`${process.env.REACT_APP_API_URL}/${searchParams.get('mail') ? 'verify_new_email' : 'verify_account'}/${verificationId}`, {headers: {Authorization: `Bearer ${getToken()}`}})
             .then(response => {
                 if (!searchParams.get('mail')) localStorage.setItem('jwt', response.data)
                 setIsASuccess(true)
@@ -32,7 +33,7 @@ export default function VerifyAccount() {
                         <CheckWithCircle className='h-10 w-10 text-slate-400/60 mx-auto' />
                         <div className='mt-5 subtitle'>Successfully verified!</div>
                         <p className='mt-3'>{searchParams.get('mail') ? 'Your new email has been verified successfully and your profile has been updated.' : 'Your email has been verified successfully. You can now start using Quizwiz.'}</p>
-                        <Link to='/' className='mt-7 primary block w-fit mx-auto' >Start browsing</Link>
+                        <button onClick={() => window.location.href = window.location.origin} className='mt-7 mx-auto primary' >Start browsing</button>
                     </div>
                 </div>
             )}

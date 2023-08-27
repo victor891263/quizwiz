@@ -19,13 +19,12 @@ type Props = {
         link: string | undefined
     }) => void
     updateNewEmail: (email: string) => void
+    clearNewEmail: () => void
     setError: (msg: string) => void
     setSuccess: (msg: string) => void
-    operationError: string
-    operationSuccess: string
 }
 
-export default function EditProfile({ profile, updateDetails, updateNewEmail, setError, setSuccess, operationError, operationSuccess }: Props) {
+export default function EditProfile({ profile, updateDetails, updateNewEmail, clearNewEmail, setError, setSuccess }: Props) {
     const detailsSchema = Joi.object({
         name: Joi.string().min(0).max(50),
         username: Joi.string().min(1).max(50).required(),
@@ -89,7 +88,14 @@ export default function EditProfile({ profile, updateDetails, updateNewEmail, se
         } else {
             setIsLoading(true)
             try {
-                await axios.put(`${process.env.REACT_APP_API_URL}/users`, details, {headers: {Authorization: `Bearer ${getToken()}`}})
+                await axios.put(`${process.env.REACT_APP_API_URL}/users`, {
+                    // empty strings have to be replaced with undefined because for optional fields, whose type is string, the API throws an error if a field is an empty string
+                    username: details.username,
+                    name: details.name || undefined,
+                    about: details.about || undefined,
+                    link: details.link || undefined,
+                    updated_on: new Date().getTime()
+                }, {headers: {Authorization: `Bearer ${getToken()}`}})
                 updateDetails(details)
                 setSuccess('Your details has been updated successfully')
                 setTimeout(() => setSuccess(''), 3000)
@@ -122,7 +128,7 @@ export default function EditProfile({ profile, updateDetails, updateNewEmail, se
         } else {
             setIsLoading(true)
             try {
-                await axios.put(`${process.env.REACT_APP_API_URL}/users/email`, newEmail, {headers: {Authorization: `Bearer ${getToken()}`}})
+                await axios.put(`${process.env.REACT_APP_API_URL}/users/email`, { newEmail }, {headers: {Authorization: `Bearer ${getToken()}`}})
                 updateNewEmail(newEmail)
                 setIsLoading(false)
             }
@@ -154,7 +160,7 @@ export default function EditProfile({ profile, updateDetails, updateNewEmail, se
         } else {
             setIsLoading(true)
             try {
-                await axios.put(`${process.env.REACT_APP_API_URL}/users/password`, newPassword, {headers: {Authorization: `Bearer ${getToken()}`}})
+                await axios.put(`${process.env.REACT_APP_API_URL}/users/password`, {currentPassword, newPassword}, {headers: {Authorization: `Bearer ${getToken()}`}})
                 setSuccess('Your password has been updated successfully')
                 setTimeout(() => setSuccess(''), 3000)
                 setIsLoading(false)
@@ -195,7 +201,10 @@ export default function EditProfile({ profile, updateDetails, updateNewEmail, se
     async function cancelEmailUpdate() {
         setIsLoading(true)
         try {
-            await axios.delete(`${process.env.REACT_APP_API_URL}/user/email`, {headers: {Authorization: `Bearer ${getToken()}`}})
+            await axios.delete(`${process.env.REACT_APP_API_URL}/users/email`, {headers: {Authorization: `Bearer ${getToken()}`}})
+            clearNewEmail()
+            setNewEmail('')
+            // create popup
             setSuccess('The process of updating your email has been stopped.')
             setTimeout(() => setSuccess(''), 3000)
             setIsLoading(false)
@@ -212,9 +221,9 @@ export default function EditProfile({ profile, updateDetails, updateNewEmail, se
     return (
         <div className='space-y-8'>
             <h2 className='subtitle'>Edit profile</h2>
-            <div className='text-slate-400 flex'>
+            <div className='text-slate-400 flex max-w-full overflow-x-auto'>
                 {['details', 'email', 'password', 'misc'].map(item => (
-                    <button onClick={() => setShowing(item as ('details' | 'email' | 'password' | 'misc'))} className={'px-4 py-2.5 rounded-none border-b capitalize ' + (showing === item ? 'border-slate-900 text-slate-900' : '')}>{item}</button>
+                    <button onClick={() => setShowing(item as ('details' | 'email' | 'password' | 'misc'))} className={'px-4 py-2.5 rounded-none border-b capitalize ' + (showing === item ? 'border-slate-900 text-slate-900 dark:border-white dark:text-white' : '')}>{item}</button>
                 ))}
                 <div className='border-b w-full'></div>
             </div>
@@ -333,10 +342,10 @@ export default function EditProfile({ profile, updateDetails, updateNewEmail, se
             {showing === 'misc' && (
                 <>
                     <div>
-                        <h3 className='mb-3 text-lg font-semibold'>Leaving Quizwiz?</h3>
+                        <h3 className='mb-3 text-lg font-bold'>Leaving Quizwiz?</h3>
                         <p>All quizzes, answers, and comments attributed to this account will be deleted permanently. This action is not reversible.</p>
                     </div>
-                    <button onClick={deleteProfile} disabled={isLoading} className='relative primary disabled:text-transparent'>
+                    <button onClick={deleteProfile} disabled={isLoading} className='relative secondary text-red-600 disabled:!text-transparent'>
                         <span>Delete my account</span>
                         {isLoading && (
                             <div className='absolute top-0 left-0 h-full w-full flex items-center justify-center'>

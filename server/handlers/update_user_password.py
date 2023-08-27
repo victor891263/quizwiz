@@ -9,13 +9,13 @@ def update_user_password():
 
     # check if the given password matches with the one in the database. If it doesn't, don't proceed
     user = User.objects(id=authorized_user['_id']).first()
-    is_password_valid = bcrypt.checkpw(passwords['current_password'], user.password)
+    is_password_valid = bcrypt.checkpw(passwords['currentPassword'].encode('utf-8'), user.password.encode('utf-8'))
     if not is_password_valid:
         return 'Wrong password', 400
 
     # hash the password to make it complex and unreadable
     salt = bcrypt.gensalt(10)
-    hashed_new_password = bcrypt.hashpw(passwords['new_password'].encode('utf-8'), salt).decode('utf-8')
+    hashed_new_password = bcrypt.hashpw(passwords['newPassword'].encode('utf-8'), salt).decode('utf-8')
 
     # update the password
     user.password = hashed_new_password

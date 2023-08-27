@@ -3,11 +3,13 @@ from mongoengine import Document, EmbeddedDocument, StringField, IntField, Boole
 from .User import User
 
 class Option(EmbeddedDocument):
+    _id = ObjectIdField()
     body = StringField(required=True)
     is_correct = BooleanField(required=True)
 
 class Question(EmbeddedDocument):
-    title = StringField(required=True, max_length=500)
+    _id = ObjectIdField()
+    title = StringField(required=True, max_length=300)
     options = ListField(EmbeddedDocumentField(Option))
 
 class Answer(EmbeddedDocument):
@@ -15,18 +17,20 @@ class Answer(EmbeddedDocument):
     choice_id = ObjectIdField(required=True)
 
 class Response(EmbeddedDocument):
-    user = ReferenceField(User, required=True)
+    _id = ObjectIdField()
+    user = ReferenceField(User)
     answers = ListField(EmbeddedDocumentField(Answer))
-    elapsed_time = IntField(max_value=3600, min_value=1)
-    created_on = DateTimeField(default=datetime.now())
+    elapsed_time = IntField(max_value=60, min_value=1)
+    created_on = IntField()
 
 class Comment(EmbeddedDocument):
+    _id = ObjectIdField()
     user = ReferenceField(User, required=True)
-    body = StringField(required=True, max_length=500)
-    liked_users = ListField(ReferenceField(User))
-    disliked_users = ListField(ReferenceField(User))
-    created_on = DateTimeField(default=datetime.now())
-    updated_on = DateTimeField(default=datetime.now())
+    body = StringField(required=True, max_length=300)
+    liked_users = ListField(ObjectIdField())
+    disliked_users = ListField(ObjectIdField())
+    created_on = IntField()
+    updated_on = IntField()
 
 class Test(Document):
     questions = ListField(EmbeddedDocumentField(Question))
@@ -34,11 +38,11 @@ class Test(Document):
     comments = ListField(EmbeddedDocumentField(Comment))
     time_limit = IntField(max_value=60, min_value=1)
     blocked_users = ListField(ObjectIdField())
-    user = ReferenceField(User)
+    user = ReferenceField(User, required=True)
     liked_users = ListField(ObjectIdField())
     disliked_users = ListField(ObjectIdField())
-    tags = ListField(StringField(max_length=100))
-    title = StringField(required=True, max_length=250)
-    description = StringField(required=True, max_length=1000)
-    created_on = DateTimeField(default=datetime.now())
-    updated_on = DateTimeField(default=datetime.now())
+    tags = ListField(StringField(max_length=50))
+    title = StringField(required=True, max_length=60)
+    description = StringField(required=True, max_length=500)
+    created_on = IntField()
+    updated_on = IntField()

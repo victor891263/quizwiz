@@ -3,11 +3,12 @@
 const defaultTheme = require('tailwindcss/defaultTheme')
 
 module.exports = {
-    content: ["./src/**/*.{tsx,ts}"],
+    content: ["./src/**/*.{tsx,ts}", "./public/index.html"],
+    darkMode: 'class',
     theme: {
         extend: {
             fontFamily: {
-                'sans': ['Open Sans', ...defaultTheme.fontFamily.sans],
+                'sans': ['Proxima Nova', ...defaultTheme.fontFamily.sans],
             },
         },
     },

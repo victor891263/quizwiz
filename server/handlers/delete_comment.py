@@ -8,7 +8,7 @@ def delete_comment(id, comment_id):
     test = Test.objects(id=id).first()
 
     # find out the index of the comment to delete
-    comment_to_update = [c for c in test.comments if (str(c.id) == comment_id & str(c.user) == authorized_user['_id'])][0]
+    comment_to_update = [c for c in test.comments if ((str(c['_id']) == str(comment_id)) & (str(c['user'].id) == authorized_user['_id']))][0]
     comment_index = test.comments.index(comment_to_update)
 
     # delete the comment

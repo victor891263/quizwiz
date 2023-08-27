@@ -1,5 +1,8 @@
 from models.User import User
 from models.Test import Test
+from flask import jsonify, Response
+from bson import json_util
+import json
 
 def get_user(id):
     # this pipeline handles population of user and conversion of values of attributes of list types to their lengths
@@ -45,9 +48,9 @@ def get_user(id):
         return 'This user does not exist', 404
 
     # get all tests submitted by the specified user
-    tests = Test.objects(user=id).aggregate(*pipeline)
+    tests = Test.objects(user=id).aggregate(pipeline)
 
-    return {
-        'user_details': user.to_json(),
-        'quizzes': tests.to_json()
-    }
+    return jsonify({
+        'user_details': json.loads(user.to_json()),
+        'quizzes': json.loads(json_util.dumps(list(tests)))
+    })

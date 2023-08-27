@@ -45,8 +45,12 @@ export type Response = {
         img?: string
     }
     answers: {
-        question_id: string
-        choice_id: string
+        question_id: {
+            $oid: string
+        }
+        choice_id: {
+            $oid: string
+        }
     }[]
     correctness: number
     elapsed_time?: number
@@ -159,6 +163,17 @@ export type QuizWithQuestions = {
     }
     questions: Question[]
     time_limit?: number
+    tags: string[]
+    title: string
+    description: string
     created_on: number
     updated_on: number
+}
+
+export type QuizInput = {
+    questions: Question[]
+    time_limit?: number
+    tags: string[]
+    title: string
+    description: string
 }

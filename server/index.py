@@ -7,6 +7,7 @@ import jwt
 from flask_mail import Mail
 
 # import routes
+from routes.tests import tests_blueprint
 from routes.users import users_blueprint
 from routes.auth import auth_blueprint
 from routes.verify_account import verify_account_blueprint
@@ -27,7 +28,7 @@ CORS(app)
 # catch all errors
 @app.errorhandler(Exception)
 def catch_error(error):
-    error_message = str(error) if error.args else 'Unknown error occurred'
+    error_message = str(error) if (error or error.args) else 'Unknown error occurred'
     return make_response(error_message, 500)
 
 # Configure email settings
@@ -50,16 +51,18 @@ def get_user():
 
     if auth_header and auth_header.startswith('Bearer '):
         token = auth_header.split(' ')[1] # extract the token
-        try:
-            user_info = jwt.decode(token, JWT_SECRET, algorithms=['HS256'])
-            if user_info.isVerified:
-                request.authorized_user = user_info
-            else:
-                request.unauthorized_user = user_info
-        except jwt.ExpiredSignatureError:
-            return 'Session expired', 401
-        except jwt.InvalidTokenError:
-            return 'Invalid token', 401
+
+        if token and (token != 'null'):
+            try:
+                user_info = jwt.decode(token, JWT_SECRET, algorithms=['HS256'])
+                if user_info['isVerified']:
+                    request.authorized_user = user_info
+                else:
+                    request.unauthorized_user = user_info
+            except jwt.ExpiredSignatureError:
+                return 'Session expired', 401
+            except jwt.InvalidTokenError:
+                return 'Invalid token', 401
 
 # register blueprints/routes
 app.register_blueprint(auth_blueprint)
@@ -67,6 +70,7 @@ app.register_blueprint(verify_account_blueprint)
 app.register_blueprint(verify_new_email_blueprint)
 app.register_blueprint(recover_account_blueprint)
 app.register_blueprint(users_blueprint)
+app.register_blueprint(tests_blueprint)
 
 '''
 # disconnect from database if API stops running

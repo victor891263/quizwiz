@@ -26,7 +26,7 @@ export default function Recover() {
             return
         }
         setIsLoading(true)
-        axios.post(`${process.env.REACT_APP_API_URL}/recover`, email)
+        axios.post(`${process.env.REACT_APP_API_URL}/recover`, {email})
             .then(() => {
                 setSuccessMsg('Recovery instructions has been sent to your email address')
                 setTimeout(() => setSuccessMsg(''), 3000)

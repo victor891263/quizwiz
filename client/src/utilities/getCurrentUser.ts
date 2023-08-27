@@ -4,7 +4,8 @@ export default function getCurrentUser() {
     const token = localStorage.getItem('jwt')
     if (token) return jwtDecode<{
         _id: string,
-        isVerified: boolean
+        isVerified: boolean,
+        username: string
     }>(token)
 }
 

@@ -6,7 +6,8 @@ export default function Unverified() {
 
     function logout() {
         localStorage.removeItem('jwt')
-        navigate('/')
+        localStorage.removeItem('rememberMe')
+        window.location.href = window.location.origin
     }
 
     return (

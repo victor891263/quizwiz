@@ -1,7 +1,4 @@
-
-
-import {Link, useParams} from "react-router-dom"
-import {longQuizzes as dummyQuizzes} from '../dummy/quizzes'
+import {Link, useNavigate, useParams} from "react-router-dom"
 import {useEffect, useState} from "react"
 import {Quiz} from "../types"
 import getTimeLabel from "../utilities/getTimeLabel"
@@ -15,10 +12,16 @@ import LikeIcon from "../icons/LikeIcon"
 import Spinner from "../icons/Spinner"
 import PopUp from "../components/PopUp"
 import handleTextareaResize from "../utilities/handleTextareaResize"
-import ExclaimationIcon from "../icons/ExclaimationIcon";
-import getCurrentUser from "../utilities/getCurrentUser";
-import Avatar from "../components/avatar";
-import AvatarIcon from "../icons/AvatarIcon";
+import ExclaimationIcon from "../icons/ExclaimationIcon"
+import getCurrentUser from "../utilities/getCurrentUser"
+import AvatarIcon from "../icons/AvatarIcon"
+import CrossWithCircle from "../icons/CrossWithCircle";
+import ChatBubblesIcon from "../icons/ChatBubblesIcon";
+import ClockIcon from "../icons/ClockIcon";
+import Comment from "../components/Comment";
+import PencilIcon from "../icons/PencilIcon";
+import TrashIcon from "../icons/TrashIcon";
+import Header from "../components/Header";
 
 export default function QuizComponent() {
     const [quiz, setQuiz] = useState<Quiz>()
@@ -31,14 +34,14 @@ export default function QuizComponent() {
     const [commentBody, setCommentBody] = useState('')
     const [commentBodyError, setCommentBodyError] = useState('')
 
-    const [isEditBoxOpen, setIsEditBoxOpen] = useState(false)
-
     const {id: quizId} = useParams()
     const currentUser = getCurrentUser()
+    const navigate = useNavigate()
 
     useEffect(() => {
         axios.get(`${process.env.REACT_APP_API_URL}/tests/${quizId}`, {headers: {Authorization: `Bearer ${getToken()}`}})
             .then(response => {
+                console.log(response.data)
                 setQuiz(response.data)
             })
             .catch(error => {
@@ -50,9 +53,10 @@ export default function QuizComponent() {
         if (quiz && currentUser) {
             e.target.disabled = true
             try {
-                await axios.put(`${process.env.REACT_APP_API_URL}/tests/${quizId}/${type}`)
+                await axios.put(`${process.env.REACT_APP_API_URL}/tests/${quizId}/${type}`, undefined, {headers: {Authorization: `Bearer ${getToken()}`}})
                 // update the current quiz stored in the state
                 const newQuiz = {...quiz}
+                // because of the mongoengine's weird issue, likes and dislikes cannot be removed once they are made - "unliking" is not possible for example
                 if (type === 'like') newQuiz.liked_users.push({ $oid: currentUser._id })
                 if (type === 'dislike') newQuiz.disliked_users.push({ $oid: currentUser._id })
                 setQuiz(newQuiz)
@@ -78,8 +82,8 @@ export default function QuizComponent() {
         }
         setIsLoading(true)
         try {
-            const {data: quizWithCommentAdded} = await axios.post(`${process.env.REACT_APP_API_URL}/tests/${quizId}/comments`, commentBody)
-            setQuiz(quizWithCommentAdded)
+            await axios.post(`${process.env.REACT_APP_API_URL}/tests/${quizId}/comments`, {commentBody, created_on: new Date().getTime(), updated_on: new Date().getTime()}, {headers: {Authorization: `Bearer ${getToken()}`}})
+            navigate(0)
         } catch (error) {
             handleAxiosError(error, (msg: string) => {
                 setOperationError(msg)
@@ -92,7 +96,7 @@ export default function QuizComponent() {
     async function deleteQuiz() {
         setIsDeleting(true)
         try {
-            await axios.delete(`${process.env.REACT_APP_API_URL}/tests/${quizId}`)
+            await axios.delete(`${process.env.REACT_APP_API_URL}/tests/${quizId}`, {headers: {Authorization: `Bearer ${getToken()}`}})
         } catch (error) {
             handleAxiosError(error, (msg: string) => {
                 setOperationError(msg)
@@ -106,10 +110,11 @@ export default function QuizComponent() {
         if (quiz && currentUser) {
             e.target.disabled = true
             try {
-                await axios.put(`${process.env.REACT_APP_API_URL}/tests/${quizId}/comments/${commentId}/${type}`)
+                await axios.put(`${process.env.REACT_APP_API_URL}/tests/${quizId}/comments/${commentId}/${type}`, undefined, {headers: {Authorization: `Bearer ${getToken()}`}})
                 // update the comment of the current quiz stored in the state
                 const newQuiz = {...quiz}
                 const commentToUpdate = newQuiz.comments.find(c => c._id.$oid === commentId)!
+                // because of the mongoengine's weird issue, likes and dislikes cannot be removed once they are made - "unliking" is not possible for example
                 if (type === 'like') commentToUpdate.liked_users.push({ $oid: currentUser._id })
                 if (type === 'dislike') commentToUpdate.disliked_users.push({ $oid: currentUser._id })
                 setQuiz(newQuiz)
@@ -123,15 +128,41 @@ export default function QuizComponent() {
         }
     }
 
+    async function updateComment(e:any, commentId: string, newComment:string) {
+        try {
+            await axios.put(`${process.env.REACT_APP_API_URL}/tests/${quizId}/comments/${commentId}`, {newComment, updated_on: new Date().getTime()}, {headers: {Authorization: `Bearer ${getToken()}`}})
+            navigate(0)
+        } catch (error) {
+            handleAxiosError(error, (msg: string) => {
+                setOperationError(msg)
+                setTimeout(() => setOperationError(''), 3000)
+            })
+        }
+    }
+
+    async function deleteComment(e:any, commentId: string) {
+        try {
+            e.target.disabled = true
+            await axios.delete(`${process.env.REACT_APP_API_URL}/tests/${quizId}/comments/${commentId}`, {headers: {Authorization: `Bearer ${getToken()}`}})
+            navigate(0)
+        } catch (error) {
+            handleAxiosError(error, (msg: string) => {
+                setOperationError(msg)
+                setTimeout(() => setOperationError(''), 3000)
+                e.target.disabled = false
+            })
+        }
+    }
 
     return (
         <>
+            <Header />
             <PopUp isVisible={!!operationError} msg={operationError} color='red' />
             {quiz && (
-                <div className='m-auto container max-w-screen-md py-20 px-6'>
+                <div className='m-auto container max-w-screen-md pt-40 pb-20 px-6'>
                     <div className='space-y-6'>
                         {quiz.user ? (
-                            <div className='flex items-center space-x-2'>
+                            <Link to={`/users/${quiz.user._id.$oid}`} className='flex items-center space-x-2 w-fit'>
                                 {quiz.user.img ? (
                                     <img src={quiz.user.img} className='h-12 w-12 rounded-full' />
                                 ):(
@@ -141,7 +172,7 @@ export default function QuizComponent() {
                                     <div>{quiz.user.username}</div>
                                     <div className='text-slate-400 text-sm'>{getTimeLabel(quiz.created_on)}</div>
                                 </div>
-                            </div>
+                            </Link>
                         ):(
                             <div className='flex items-center space-x-2'>
                                 <AvatarIcon className='h-12 w-12 text-slate-400/50' />
@@ -151,15 +182,21 @@ export default function QuizComponent() {
                                 </div>
                             </div>
                         )}
-                        <h1 className='text-3xl font-bold tracking-tight'>{quiz.title}</h1>
+                        <h1 className='text-3xl font-bold tracking-[0]'>{quiz.title}</h1>
                         <div className='flex gap-x-4 italic'>
                             <div><span className='font-semibold'>{quiz.questions}</span> questions</div>
                             <div><span className='font-semibold'>{quiz.responses}</span> responses</div>
                         </div>
-                        <p className='text-lg leading-[1.75] whitespace-break-spaces'>{quiz.description}</p>
-                        <div className='pt-1 pb-2 flex flex-wrap gap-2'>
+                        {quiz.time_limit && (
+                            <div className='flex items-center space-x-2'>
+                                <div className='font-bold'>Timer:</div>
+                                <div>{quiz.time_limit} minutes</div>
+                            </div>
+                        )}
+                        <p className='text-lg leading-[1.65] whitespace-break-spaces'>{quiz.description}</p>
+                        <div className='pt-2.5 pb-3 flex flex-wrap gap-2'>
                             {quiz.tags.map((tag, index) => (
-                                <div className='bg-slate-100 rounded-md py-1.5 px-2.5 text-slate-500 uppercase' key={index}>{tag}</div>
+                                <div className='border border-slate-300 rounded py-1.5 px-2.5 text-slate-400 uppercase' key={index}>{tag}</div>
                             ))}
                         </div>
                         <div className='flex gap-x-4 italic'>
@@ -168,28 +205,50 @@ export default function QuizComponent() {
                             <div><span className='font-semibold'>{quiz.comments.length}</span> comments</div>
                         </div>
                     </div>
-                    <div className='pt-11 mt-11 border-t'>
-                        {quiz.is_response_submitted && (
-                            <Link to={`/quizzes/${quizId}/results`} className='primary'>View your results</Link>
-                        )}
-                        {(!!(currentUser && quiz.blocked_users.find(u => u.$oid === currentUser._id))) && (
-                            <div className='bg-slate-100 p-4 pr-5 text-slate-500 rounded-lg flex items-center space-x-2.5'>
+                    {currentUser && (
+                        <>
+                            {quiz.is_response_submitted && (
+                                <div className='pt-11 mt-11 border-t'>
+                                    <div className=''>
+                                        <Link to={`/quizzes/${quizId}/results`} className='block w-fit primary'>View your results</Link>
+                                    </div>
+                                </div>
+                            )}
+                            {(!!quiz.blocked_users.find(u => u.$oid === currentUser._id)) && (
+                                <div className='pt-11 mt-11 border-t'>
+                                    <div className='bg-slate-100 p-4 pr-5 text-slate-500 rounded flex items-center space-x-2.5'>
+                                        <ExclaimationIcon className='h-[18px] w-[18px]' />
+                                        <span className='font-medium tracking-[-0.005em]'>You failed to complete this test in time. You cannot retake.</span>
+                                    </div>
+                                </div>
+                            )}
+                            {((quiz.user?._id.$oid !== currentUser._id) && (!quiz.is_response_submitted) && (!quiz.blocked_users.find(u => u.$oid === currentUser._id))) && (
+                                <div className='pt-11 mt-11 border-t'>
+                                    <Link to={`/quizzes/${quizId}/questions`} className='block w-fit primary'>Take the quiz</Link>
+                                </div>
+                            )}
+                        </>
+                    )}
+                    {(!currentUser) && (
+                        <div className='pt-11 mt-11 border-t'>
+                            <div className='bg-slate-100 p-4 pr-5 text-slate-500 rounded flex items-center space-x-2.5'>
                                 <ExclaimationIcon className='h-[18px] w-[18px]' />
-                                <span className='font-medium tracking-[-0.005em]'>You failed to complete this test in time. You cannot retake.</span>
+                                <span className='font-medium tracking-[-0.005em]'>Only logged in users can take the quiz.</span>
                             </div>
-                        )}
-                        {!(quiz.is_response_submitted || (!!(currentUser && quiz.blocked_users.find(u => u.$oid === currentUser._id)))) && (
-                            <Link to={`/quizzes/${quizId}/questions`} className='primary'>Take the quiz</Link>
-                        )}
-                    </div>
+                        </div>
+                    )}
                     {currentUser && (
                         ((quiz.user && (currentUser._id === quiz.user._id.$oid)) ? (
                             <div className='pt-11 mt-11 border-t'>
                                 <div className='flex space-x-2.5'>
                                     <Link to={`/quizzes/${quizId}/responses`} className='secondary' >View responses</Link>
-                                    <button className='secondary' onClick={() => setIsEditBoxOpen(true)}>Edit quiz</button>
+                                    <Link to={`/quizzes/${quizId}/edit`} className='secondary' >
+                                        <span className='max-[440px]:hidden'>Edit quiz</span>
+                                        <div className='min-[440px]:hidden h-full w-full flex items-center justify-center'><PencilIcon className='h-[18px] w-[18px]' /></div>
+                                    </Link>
                                     <button onClick={deleteQuiz} disabled={isDeleting} className='relative secondary text-red-600 disabled:!text-transparent'>
-                                        <span>Delete quiz</span>
+                                        <span className='max-[440px]:hidden'>Delete quiz</span>
+                                        <div className='min-[440px]:hidden h-full w-full flex items-center justify-center'><TrashIcon className='h-[18px] w-[18px]' /></div>
                                         {isDeleting && (
                                             <div className='absolute top-0 left-0 h-full w-full flex items-center justify-center'>
                                                 <Spinner className='h-5 w-5 border-[3px] text-slate-500' />
@@ -203,7 +262,7 @@ export default function QuizComponent() {
                                 <div className='flex space-x-2.5'>
                                     <button
                                         onClick={(e) => reactToQuiz(e,'like')}
-                                        disabled={!!quiz.disliked_users.find(u => u.$oid === currentUser._id)}
+                                        disabled={(!!quiz.liked_users.find(u => u.$oid === currentUser._id)) || (!!quiz.disliked_users.find(u => u.$oid === currentUser._id))}
                                         className='secondary flex items-center space-x-1.5'
                                     >
                                         {quiz.liked_users.find(u => u.$oid === currentUser._id) ? (
@@ -220,7 +279,7 @@ export default function QuizComponent() {
                                     </button>
                                     <button
                                         onClick={(e) => reactToQuiz(e,'dislike')}
-                                        disabled={!!quiz.liked_users.find(u => u.$oid === currentUser._id)}
+                                        disabled={(!!quiz.liked_users.find(u => u.$oid === currentUser._id)) || (!!quiz.disliked_users.find(u => u.$oid === currentUser._id))}
                                         className='secondary flex items-center space-x-1.5'
                                     >
                                         {quiz.disliked_users.find(u => u.$oid === currentUser._id) ? (
@@ -241,90 +300,48 @@ export default function QuizComponent() {
                     )}
                     <div className='pt-11 mt-11 border-t'>
                         <h2 className='subtitle mb-10'>Comments ({quiz.comments.length})</h2>
-                        <div className='relative'>
-                            <textarea className='w-full h-32 !pb-16' placeholder='What are your thoughts?' value={commentBody} onChange={e => {
-                                handleTextareaResize(e)
-                                setCommentBody(e.target.value)
-                            }} />
-                            <div className='absolute bottom-2.5 right-2.5'>
-                                <button onClick={submitComment} disabled={isLoading} className='ml-auto relative block primary disabled:text-transparent'>
-                                    <span>Submit</span>
-                                    {isLoading && (
-                                        <div className='absolute top-0 left-0 h-full w-full flex items-center justify-center'>
-                                            <Spinner className='h-5 w-5 border-[3px] text-white' />
-                                        </div>
-                                    )}
-                                </button>
+                        {currentUser ? (
+                            <div className='relative'>
+                                <textarea className='w-full h-32 !py-2.5 !px-3.5 !pb-16' placeholder='What are your thoughts?' value={commentBody} onChange={e => {
+                                    handleTextareaResize(e)
+                                    setCommentBody(e.target.value)
+                                }} />
+                                <div className='absolute bottom-4 right-3.5'>
+                                    <button onClick={submitComment} disabled={isLoading} className='ml-auto relative block primary disabled:text-transparent'>
+                                        <span>Post</span>
+                                        {isLoading && (
+                                            <div className='absolute top-0 left-0 h-full w-full flex items-center justify-center'>
+                                                <Spinner className='h-5 w-5 border-[3px] text-white' />
+                                            </div>
+                                        )}
+                                    </button>
+                                </div>
+                                <div className='absolute bottom-2.5 left-3.5 text-sm text-slate-400'>{commentBody.length}/500</div>
                             </div>
-                            <div className='absolute bottom-2 left-3 text-sm text-slate-400'>{commentBody.length}/500</div>
-                        </div>
+                        ):(
+                            <div className='bg-slate-100 p-4 pr-5 text-slate-500 rounded-lg flex items-center space-x-2.5'>
+                                <ExclaimationIcon className='h-[18px] w-[18px]' />
+                                <span className='font-medium tracking-[-0.005em]'>Only logged in users can post a comment</span>
+                            </div>
+                        )}
                         {commentBodyError && (
                             <div className='mt-2.5 text-red-600 text-sm first-letter:capitalize'>{commentBodyError}</div>
                         )}
 
                         <div className='mt-2 divide-y'>
-                            {quiz.comments.map((comment, index) => (
-                                <div className='space-y-5 py-11' key={index}>
-                                    {quiz.user ? (
-                                        <div className='flex items-center space-x-2'>
-                                            {quiz.user.img ? (
-                                                <img src={quiz.user.img} className='h-10 w-10 rounded-full' />
-                                            ):(
-                                                <AvatarIcon className='h-10 w-10 text-slate-400/50' />
-                                            )}
-                                            <div className='pl-1 space-y-0.5'>
-                                                <div className='text-sm font-semibold'>{comment.user.username}</div>
-                                                <div className='text-slate-400 text-xs'>{getTimeLabel(comment.created_on)}</div>
-                                            </div>
-                                        </div>
-                                    ):(
-                                        <div className='flex items-center space-x-2'>
-                                            <AvatarIcon className='h-10 w-10 text-slate-400/50' />
-                                            <div className='pl-1 space-y-0.5'>
-                                                <div className='text-sm font-semibold'>[anonymous]</div>
-                                                <div className='text-slate-400 text-xs'>{getTimeLabel(comment.created_on)}</div>
-                                            </div>
-                                        </div>
-                                    )}
-                                    <p>{comment.body}</p>
-                                    <div className='flex gap-x-2 text-sm'>
-                                        <button
-                                            onClick={(e) => reactToComment(e, comment._id.$oid, 'like')}
-                                            disabled={(!currentUser) || (!!comment.disliked_users.find(u => u.$oid === currentUser._id))}
-                                            className='secondary !py-1 !px-2 flex items-center space-x-1'
-                                        >
-                                            {currentUser && comment.liked_users.find(u => u.$oid === currentUser._id) ? (
-                                                <>
-                                                    <LikeIcon fill={true} className='w-4 h-4' />
-                                                    <span>{comment.liked_users.length}</span>
-                                                </>
-                                            ):(
-                                                <>
-                                                    <LikeIcon className='w-4 h-4' />
-                                                    <span>{comment.liked_users.length}</span>
-                                                </>
-                                            )}
-                                        </button>
-                                        <button
-                                            onClick={(e) => reactToComment(e, comment._id.$oid, 'dislike')}
-                                            disabled={(!currentUser) || (!!comment.liked_users.find(u => u.$oid === currentUser._id))}
-                                            className='secondary !py-1 !px-2 flex items-center space-x-1'
-                                        >
-                                            {currentUser && comment.disliked_users.find(u => u.$oid === currentUser._id) ? (
-                                                <>
-                                                    <DislikeIcon fill={true} className='w-4 h-4' />
-                                                    <span>{comment.disliked_users.length}</span>
-                                                </>
-                                            ):(
-                                                <>
-                                                    <DislikeIcon className='w-4 h-4' />
-                                                    <span>{comment.disliked_users.length}</span>
-                                                </>
-                                            )}
-                                        </button>
+                            {quiz.comments.length > 0 ? (
+                                quiz.comments.map((comment, index) => (
+                                    <Comment comment={comment} currentUser={currentUser!} reactToComment={reactToComment} updateComment={updateComment} deleteComment={deleteComment} isError={!!operationError} />
+                                ))
+                            ):(
+                                <div className='w-full pt-12 flex justify-center'>
+                                    <div className='text-center max-w-md'>
+                                        <ChatBubblesIcon className='h-10 w-10 text-slate-400/60 mx-auto dark:text-gray-600' />
+                                        <div className='mt-5 subtitle'>No comments</div>
+                                        <p className='mt-3'>No user has added a comment to this quiz.</p>
                                     </div>
                                 </div>
-                            ))}
+                            )}
                         </div>
                     </div>
                 </div>

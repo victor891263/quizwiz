@@ -7,6 +7,7 @@ from handlers.get_test_with_questions_and_responses import get_test_with_questio
 from handlers.get_test_with_single_response import get_test_with_single_response
 from handlers.get_test import get_test
 from handlers.get_tests import get_tests
+from handlers.get_all_tags import get_all_tags
 from handlers.submit_response import submit_response
 from handlers.add_test import add_test
 from handlers.update_test import update_test
@@ -21,9 +22,19 @@ from handlers.add_user_to_blocked_list import add_user_to_blocked_list
 tests_blueprint = Blueprint('tests', __name__)
 
 
+# get all tests
+@tests_blueprint.route('/tests', methods=['GET'])
+def get_tests_wrapper():
+    return get_tests()
+
+# get all tags
+@tests_blueprint.route('/tests/tags', methods=['GET'])
+def get_all_tags_wrapper():
+    return get_all_tags()
+
 # get a test with questions only
 @tests_blueprint.route('/tests/<string:id>/questions', methods=['GET'])
-def get_test_with_questions(id):
+def get_test_with_questions_wrapper(id):
     return get_test_with_questions(id)
 
 # get a test with questions but only a single response
@@ -40,23 +51,19 @@ def get_test_with_questions_and_responses_wrapper(id):
 
 # submit a response to a test
 @tests_blueprint.route('/tests/<string:id>/responses', methods=['PUT'])
+@verify_authorization
 def submit_response_wrapper(id):
     return submit_response(id)
 
 # add a user to the block list if the user failed to submit the response in time
 @tests_blueprint.route('/tests/<string:id>/expired', methods=['PUT'])
-def add_user_to_blocked_list(id):
+def add_user_to_blocked_list_wrapper(id):
     return add_user_to_blocked_list(id)
 
 # get a test
 @tests_blueprint.route('/tests/<string:id>', methods=['GET'])
 def get_test_wrapper(id):
     return get_test(id)
-
-# get all tests
-@tests_blueprint.route('/tests', methods=['GET'])
-def get_tests_wrapper():
-    return get_tests()
 
 # add a new test
 @tests_blueprint.route('/tests', methods=['POST'])
@@ -97,23 +104,23 @@ def delete_comment_wrapper(id, comment_id):
 # like a test
 @tests_blueprint.route('/tests/<string:id>/like', methods=['PUT'])
 @verify_authorization
-def react_test_wrapper(id):
+def like_test_wrapper(id):
     return react_test(id, 'like')
 
 # dislike a test
 @tests_blueprint.route('/tests/<string:id>/dislike', methods=['PUT'])
 @verify_authorization
-def react_test_wrapper(id):
+def dislike_test_wrapper(id):
     return react_test(id, 'dislike')
 
 # like a comment
 @tests_blueprint.route('/tests/<string:id>/comments/<string:comment_id>/like', methods=['PUT'])
 @verify_authorization
-def react_comment_wrapper(id, comment_id):
+def like_comment_wrapper(id, comment_id):
     return react_comment(id, comment_id, 'like')
 
 # dislike a comment
 @tests_blueprint.route('/tests/<string:id>/comments/<string:comment_id>/dislike', methods=['PUT'])
 @verify_authorization
-def react_comment_wrapper(id, comment_id):
+def dislike_comment_wrapper(id, comment_id):
     return react_comment(id, comment_id, 'dislike')

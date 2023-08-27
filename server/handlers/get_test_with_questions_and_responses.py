@@ -1,9 +1,15 @@
 from models.Test import Test
+from flask import jsonify
+import json
+from bson import json_util
 
 def get_test_with_questions_and_responses(id):
     pipeline = [
         {
-            "$unwind": "$responses"
+            "$unwind": {
+                "path": "$responses",
+                "preserveNullAndEmptyArrays": True
+            }
         },
         {
             "$lookup": {
@@ -14,7 +20,10 @@ def get_test_with_questions_and_responses(id):
             }
         },
         {
-            "$unwind": "$responses.user"
+            "$unwind": {
+                "path": "$responses.user",
+                "preserveNullAndEmptyArrays": True
+            }
         },
         {
             "$project": {
@@ -24,8 +33,8 @@ def get_test_with_questions_and_responses(id):
                     "_id": 1,
                     "user": {
                         "_id": 1,
-                        "username": "$comments.user.username",
-                        "img": "$comments.user.img"
+                        "username": "$responses.user.username",
+                        "img": "$responses.user.img"
                     },
                     "answers": 1,
                     "elapsed_time": 1,
@@ -51,31 +60,39 @@ def get_test_with_questions_and_responses(id):
     ]
 
     # retrieve the specified test
-    test = Test.objects(id=id).aggregate(*pipeline)
+    test = Test.objects(id=id).aggregate(pipeline)
 
     # send error message if the test with the id does not exist
     if not test:
         return 'This test does not exist', 404
 
     def calculate_percentage(quiz, option_id):
-        total = len(quiz.responses)  # number of total responses OR number of users who made a response
-        count = sum(1 for r in quiz.responses if any(a['choice_id'] == option_id for a in r.answers)) # find the number of responses where the specific choice was selected OR the number of users who picked the specified choice
+        total = len(quiz['responses'])  # number of total responses OR number of users who made a response
+        count = sum(1 for r in quiz['responses'] if any(a['choice_id']["$oid"] == option_id for a in r['answers'])) # find the number of responses where the specific choice was selected OR the number of users who picked the specified choice
         return round((count / total) * 100)  # calculate the percentage
 
-    test_json = test.to_json()
+    test_dict = json.loads(json_util.dumps(list(test)[0]))
 
-    # add the pick rate of each option of each question
-    for q in test_json.questions:
-        for o in q.options:
-            o['pick_rate'] = calculate_percentage(test_json, o._id["$oid"])
+    # if responses are a list of empty objects, change them into an empty list
+    if test_dict['responses'][0]['user'] == {}:
+        test_dict['responses'] = []
 
-    # calculate how many questions each user answered correctly and add the result to each response
-    for r in test_json.responses:
-        correctly_answered_questions = sum(
-            1 for a in r.answers if any(
-                o.is_correct for q in test_json.questions if q._id["$oid"] == a["question_id"] for o in q.options
-            )
-        )
-        r['correctness'] = round((correctly_answered_questions / len(test_json.questions)) * 100)
+    if len(test_dict['responses']) > 0:
+        # add the pick rate of each option of each question
+        for q in test_dict['questions']:
+            for o in q['options']:
+                o['pick_rate'] = calculate_percentage(test_dict, o['_id']["$oid"])
 
-    return test.to_json()
+        # calculate how many questions each user answered correctly and add the result to each response
+        if len(test_dict['responses']) > 0:
+            for r in test_dict['responses']:
+                correctly_answered_questions = sum(
+                    1 for a in r['answers'] if any(
+                        o['is_correct'] for q in test_dict['questions'] if q['_id']["$oid"] == a["question_id"]["$oid"]
+                        for
+                        o in q['options']
+                    )
+                )
+                r['correctness'] = round((correctly_answered_questions / len(test_dict['questions'])) * 100)
+
+    return jsonify(test_dict)

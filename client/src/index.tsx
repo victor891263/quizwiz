@@ -17,11 +17,20 @@ import Unverified from "./routes/unverified"
 import VerifyAccount from "./routes/verifyAccount"
 import Recover from "./routes/recover"
 import Reset from "./routes/reset"
+import AddQuiz from "./routes/addQuiz";
+import EditQuiz from "./routes/editQuiz";
+import initTheme from "./utilities/initTheme";
 
 function checkVerification(element: JSX.Element) {
     const currentUser = getCurrentUser()
     if (currentUser && (!currentUser.isVerified)) return <Navigate to={'/unverified'} />
     return element
+}
+
+function redirectToHome(element: JSX.Element) {
+    const currentUser = getCurrentUser()
+    if (currentUser && (!currentUser.isVerified)) return element
+    return <Navigate to={'/'} />
 }
 
 const router = createBrowserRouter([
@@ -32,7 +41,7 @@ const router = createBrowserRouter([
     },
     {
         path: '/unverified',
-        element: <Unverified />
+        element: redirectToHome(<Unverified />)
     },
     {
         path: '/recover',
@@ -57,6 +66,14 @@ const router = createBrowserRouter([
     {
         path: '/users/:id',
         element: checkVerification(<Profile />)
+    },
+    {
+        path: '/quizzes/new',
+        element: checkVerification(<AddQuiz />)
+    },
+    {
+        path: '/quizzes/:id/edit',
+        element: checkVerification(<EditQuiz />)
     },
     {
         path: '/quizzes/:id',
@@ -88,8 +105,12 @@ root.render(
 sysend.track('close', data => {
     if ((data.count === 0) && (!localStorage.getItem('rememberMe'))) {
         localStorage.removeItem('jwt')
+        localStorage.removeItem('rememberMe')
     }
 })
+
+// initialize dark mode
+initTheme()
 
 // If you want to start measuring performance in your app, pass a function
 // to log results (for example: reportWebVitals(console.log))

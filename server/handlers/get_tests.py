@@ -1,14 +1,9 @@
-from flask import request
+from flask import request, Response, jsonify
 import json
 from models.Test import Test
+from bson import json_util
 
 def get_tests():
-    keyword = request.args.get('keyword')
-    keyword = keyword.strip() if keyword else ''
-
-    tags = request.args.get('tags')
-    tags = json.loads(tags) if tags else []
-
     # this pipeline handles population of user and conversion of values of attributes of list types to their lengths
     pipeline = [
         {
@@ -44,6 +39,18 @@ def get_tests():
         }
     ]
 
+    # get query parameters
+    keyword = request.args.get('keyword')
+    tags = request.args.get('tags')
+
+    # build filters
+    query_filters = {}
+    if keyword:
+        query_filters['title__icontains'] = keyword.strip()
+    if tags:
+        query_filters['tags__in'] = json.loads(tags)
+
     # get all tests and apply filters
-    tests = Test.objects(title__icontains=keyword, tags__in=tags).aggregate(*pipeline)
-    return tests.to_json()
+    tests = Test.objects(**query_filters).aggregate(pipeline)
+
+    return Response(json_util.dumps(tests), content_type='application/json')
