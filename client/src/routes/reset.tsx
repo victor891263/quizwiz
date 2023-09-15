@@ -3,7 +3,7 @@ import PopUp from "../components/PopUp"
 import Spinner from "../icons/Spinner"
 import axios from "axios"
 import handleAxiosError from "../utilities/handleAxiosError"
-import {useParams} from "react-router-dom"
+import {useNavigate, useParams} from "react-router-dom"
 
 export default function Reset() {
     const [password, setPassword] = useState('')
@@ -14,6 +14,7 @@ export default function Reset() {
     const [successMsg, setSuccessMsg] = useState('')
 
     const {id: resetId} = useParams()
+    const navigate = useNavigate()
 
     function submitPassword() {
         if (!password) {
@@ -30,6 +31,7 @@ export default function Reset() {
                 setSuccessMsg('Your password has been successfully updated')
                 setTimeout(() => setSuccessMsg(''), 3000)
                 setIsLoading(false)
+                navigate('/')
             })
             .catch(error => {
                 handleAxiosError(error, (msg: string) => {

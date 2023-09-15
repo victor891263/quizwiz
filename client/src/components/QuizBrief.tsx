@@ -5,40 +5,38 @@ import AvatarIcon from "../icons/AvatarIcon";
 
 export default function QuizBriefComponent({quiz}: {quiz: QuizBrief}) {
     return (
-        <Link to={`/quizzes/${quiz._id.$oid}`} className='text-left flex flex-col justify-between space-y-5 py-12'>
-            <div className='space-y-4'>
-                <div className='flex items-center justify-between'>
-                    {quiz.user ? (
-                        <div className='flex items-center space-x-2'>
-                            {quiz.user.img ? (
-                                <img src={quiz.user.img} className='h-10 w-10 rounded-full' />
-                            ):(
-                                <AvatarIcon className='h-10 w-10 text-slate-400/50' />
-                            )}
-                            <div className='text-sm'>{quiz.user.username}</div>
-                        </div>
-                    ):(
-                        <div className='flex items-center space-x-2'>
+        <Link to={`/quizzes/${quiz._id.$oid}`} className='space-y-4 block py-12'>
+            <div className='flex items-center justify-between'>
+                {quiz.user ? (
+                    <div className='flex items-center space-x-2'>
+                        {quiz.user.img ? (
+                            <img src={quiz.user.img} className='h-10 w-10 rounded-full' />
+                        ):(
                             <AvatarIcon className='h-10 w-10 text-slate-400/50' />
-                            <div className='text-sm'>[anonymous]</div>
-                        </div>
-                    )}
-                    <div className='text-slate-400 text-sm'>{getTimeLabel(quiz.created_on)}</div>
-                </div>
-
-                <div className='text-xl font-bold tracking-[0]'>{quiz.title}</div>
-                <div className='flex gap-x-4 text-sm italic'>
-                    <div><span className='font-semibold'>{quiz.questions}</span> questions</div>
-                    <div><span className='font-semibold'>{quiz.responses}</span> responses</div>
-                </div>
-                <p className='line-clamp-2'>{quiz.description}</p>
-                <div className='py-1 flex flex-wrap gap-1.5 text-sm'>
-                    {quiz.tags.map((tag, index) => (
-                        <div className='border border-slate-300 rounded py-1.5 px-2.5 text-slate-400 uppercase' key={index}>{tag}</div>
-                    ))}
-                </div>
+                        )}
+                        <div className='text-sm'>{quiz.user.username}</div>
+                    </div>
+                ):(
+                    <div className='flex items-center space-x-2'>
+                        <AvatarIcon className='h-10 w-10 text-slate-400/50' />
+                        <div className='text-sm'>[anonymous]</div>
+                    </div>
+                )}
+                <div className='text-slate-400 text-sm'>{getTimeLabel(quiz.created_on)}</div>
             </div>
-            <div className='flex gap-x-4 text-sm italic'>
+
+            <div className='text-xl font-bold tracking-[0]'>{quiz.title}</div>
+            <div className='flex gap-x-4 text-sm'>
+                <div><span className='font-semibold'>{quiz.questions}</span> questions</div>
+                <div><span className='font-semibold'>{quiz.responses}</span> responses</div>
+            </div>
+            <p className='line-clamp-2'>{quiz.description}</p>
+            <div className='py-1 flex flex-wrap gap-1.5 text-sm'>
+                {quiz.tags.map((tag, index) => (
+                    <div className='bg-slate-100 rounded-md py-1.5 px-2.5 text-slate-400 uppercase' key={index}>{tag}</div>
+                ))}
+            </div>
+            <div className='pt-1 flex gap-x-4 text-sm'>
                 <div><span className='font-semibold'>{quiz.liked_users}</span> likes</div>
                 <div><span className='font-semibold'>{quiz.disliked_users}</span> dislikes</div>
                 <div><span className='font-semibold'>{quiz.comments}</span> comments</div>

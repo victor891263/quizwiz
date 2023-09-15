@@ -30,7 +30,7 @@ def update_user_email():
     print(new_email)
 
     # send a verification email to the provided email address
-    send_email(f'Visit this link to finish updating your email: {CLIENT_URL}/verify/{random_id}?mail=true', '[Quizwiz] Verify your new email', [new_email])
+    send_email(f'Visit this link to finish updating your email: {CLIENT_URL}/verifymail/{random_id}', '[Quizwiz] Verify your new email', [new_email])
 
     print('mail success')
 

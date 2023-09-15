@@ -3,12 +3,11 @@ import {Link} from "react-router-dom"
 import AvatarIcon from "../icons/AvatarIcon"
 import getTimeLabel from "../utilities/getTimeLabel"
 import LikeIcon from "../icons/LikeIcon"
-import DislikeIcon from "../icons/DislikeIcon"
 import {useEffect, useState} from "react"
 import PencilIcon from "../icons/PencilIcon"
 import TrashIcon from "../icons/TrashIcon"
 import handleTextareaResize from "../utilities/handleTextareaResize"
-import Spinner from "../icons/Spinner";
+import Spinner from "../icons/Spinner"
 
 type Props = {
     comment: Quiz['comments'][0]
@@ -56,44 +55,44 @@ export default function Comment({comment, currentUser, reactToComment, updateCom
                 </div>
             )}
             <p>{comment.body}</p>
-            <div className='flex gap-x-2 text-sm'>
+            <div className='flex space-x-2.5 text-sm'>
                 <button
                     onClick={(e) => reactToComment(e, comment._id.$oid, 'like')}
-                    disabled={(!currentUser) || (!!comment.disliked_users.find(u => u.$oid === currentUser._id)) || (!!comment.liked_users.find(u => u.$oid === currentUser._id))}
-                    className='secondary text-slate-800 !py-1 !px-2 flex items-center space-x-1 dark:text-gray-300'
+                    disabled={(!currentUser) || (comment.user._id.$oid === currentUser._id) || (!!comment.disliked_users.find(u => u.$oid === currentUser._id)) || (!!comment.liked_users.find(u => u.$oid === currentUser._id))}
+                    className='!rounded-r-none secondary text-slate-800 !py-1 !px-2 flex items-center space-x-1.5 dark:text-gray-300'
                 >
                     {currentUser && comment.liked_users.find(u => u.$oid === currentUser._id) ? (
                         <>
-                            <LikeIcon fill={true} className='w-4 h-4' />
-                            <span>{comment.liked_users.length}</span>
+                            <LikeIcon fill={true} className='w-3.5 h-3.5 rotate-180 scale-x-[-1]' />
+                            <span className='!text-sm'>{comment.liked_users.length}</span>
                         </>
                     ):(
                         <>
-                            <LikeIcon className='w-4 h-4' />
-                            <span>{comment.liked_users.length}</span>
+                            <LikeIcon className='w-3.5 h-3.5 rotate-180 scale-x-[-1]' />
+                            <span className='!text-sm'>{comment.liked_users.length}</span>
                         </>
                     )}
                 </button>
                 <button
                     onClick={(e) => reactToComment(e, comment._id.$oid, 'dislike')}
-                    disabled={(!currentUser) || (!!comment.disliked_users.find(u => u.$oid === currentUser._id)) || (!!comment.liked_users.find(u => u.$oid === currentUser._id))}
-                    className='secondary text-slate-800 !py-1 !px-2 flex items-center space-x-1 dark:text-gray-300'
+                    disabled={(!currentUser) || (comment.user._id.$oid === currentUser._id) || (!!comment.disliked_users.find(u => u.$oid === currentUser._id)) || (!!comment.liked_users.find(u => u.$oid === currentUser._id))}
+                    className='!ml-px !rounded-l-none secondary text-slate-800 !py-1 !px-2 flex items-center space-x-1.5 dark:text-gray-300'
                 >
                     {currentUser && comment.disliked_users.find(u => u.$oid === currentUser._id) ? (
                         <>
-                            <DislikeIcon fill={true} className='w-4 h-4' />
-                            <span>{comment.disliked_users.length}</span>
+                            <LikeIcon fill={true} className='w-3.5 h-3.5' />
+                            <span className='!text-sm'>{comment.disliked_users.length}</span>
                         </>
                     ):(
                         <>
-                            <DislikeIcon className='w-4 h-4' />
-                            <span>{comment.disliked_users.length}</span>
+                            <LikeIcon className='w-3.5 h-3.5' />
+                            <span className='!text-sm'>{comment.disliked_users.length}</span>
                         </>
                     )}
                 </button>
                 {(currentUser && comment.user._id.$oid === currentUser._id) && (
                     <>
-                        <button onClick={() => setIsEditBoxOpen(!isEditBoxOpen)} className={'secondary text-slate-800 !py-1 !px-2 dark:text-gray-300 ' + (isEditBoxOpen ? 'translate-y-[4px] !shadow-[0_0_0_0]' : '')}>
+                        <button onClick={() => setIsEditBoxOpen(!isEditBoxOpen)} disabled={isEditBoxOpen} className='secondary text-slate-800 !py-1 !px-2 dark:text-gray-300'>
                             <span className='max-[330px]:hidden text-sm'>Edit</span>
                             <PencilIcon className='min-[330px]:hidden w-4 h-4' />
                         </button>
@@ -106,22 +105,32 @@ export default function Comment({comment, currentUser, reactToComment, updateCom
             </div>
             {isEditBoxOpen && (
                 <div className='relative'>
-                    <textarea className='w-full h-32 !py-2.5 !px-3.5 !pb-16' placeholder='Make any changes here' value={newCommentBody} onChange={e => {
-                        handleTextareaResize(e)
-                        setNewCommentBody(e.target.value)
-                    }} />
-                    <div className='absolute bottom-4 right-3.5'>
+                    <textarea
+                        className='w-full h-32 !py-2.5 !px-3.5 !pb-16'
+                        placeholder='Make any changes here'
+                        value={newCommentBody}
+                        onChange={e => {
+                            handleTextareaResize(e)
+                            setNewCommentBody(e.target.value)
+                        }}
+                        ref={e => {
+                            if (e) handleTextareaResize({ target: e })
+                        }}
+                    />
+                    <div className='absolute bottom-2.5 right-2.5 flex space-x-2'>
+                        <button onClick={() => setIsEditBoxOpen(false)} className='secondary'>Discard</button>
                         <button onClick={e => {
                             setIsLoading(true)
                             updateComment(e, comment._id.$oid, newCommentBody)
                         }} disabled={isLoading} className='ml-auto relative block primary disabled:text-transparent'>
-                            <span>Save</span>
+                            <span>Submit</span>
                             {isLoading && (
                                 <div className='absolute top-0 left-0 h-full w-full flex items-center justify-center'>
                                     <Spinner className='h-5 w-5 border-[3px] text-white' />
                                 </div>
                             )}
                         </button>
+
                     </div>
                     <div className='absolute bottom-2.5 left-3.5 text-sm text-slate-400'>{newCommentBody.length}/500</div>
                 </div>

@@ -28,14 +28,37 @@
 @tailwind utilities;
 
 @layer base {
+    html {
+        @apply max-sm:text-[15px]
+    }
+
     body {
         -webkit-font-smoothing: antialiased;
         -moz-osx-font-smoothing: grayscale;
         letter-spacing: 0.01em;
     }
 
-    input, textarea, button {
+    /* clears the ‘X’ from Internet Explorer */
+    input[type=search]::-ms-clear,
+    input[type=search]::-ms-reveal {
+        display: none;
+        width : 0;
+        height: 0;
+    }
+    /* clears the ‘X’ from Chrome */
+    input[type="search"]::-webkit-search-decoration,
+    input[type="search"]::-webkit-search-cancel-button,
+    input[type="search"]::-webkit-search-results-button,
+    input[type="search"]::-webkit-search-results-decoration {
+        display: none;
+    }
+
+    input, textarea {
+        appearance: none;
+        background: none;
+        border: none;
         outline: none;
+        -webkit-appearance: none;
     }
 
     p {
@@ -57,7 +80,7 @@
     input[type='text']:not(.no-style),
     input[type='number']:not(.no-style),
     textarea:not(.no-style) {
-        @apply bg-slate-100 py-2 px-3 rounded
+        @apply ring-1 ring-slate-300 py-2 px-3 rounded-md dark:bg-gray-800
     }
 
     input[type='password']:disabled,
@@ -72,71 +95,104 @@
         @apply flex resize-none overflow-hidden leading-[1.65] dark:placeholder:text-gray-500
     }
 
-    button.primary,
-    button.secondary,
-    button.danger,
-    a.primary,
-    a.secondary,
-    a.danger {
-        @apply font-medium text-[15px] py-2 px-3 rounded-md transition-all focus:translate-y-[4px] focus:shadow-[0_0_0_0]
+    .primary,
+    .secondary,
+    .danger {
+        @apply font-medium py-2 px-3 rounded-md;
+        font-size: calc(1rem - 1px);
     }
 
-    button.primary,
-    a.primary {
-        @apply bg-sky-600 shadow-[0_4px_0_0] shadow-sky-700 text-white disabled:bg-sky-500 disabled:hover:bg-sky-500
+    .primary {
+        @apply bg-sky-600 text-white disabled:bg-sky-500 hover:bg-slate-100
     }
 
-    button.secondary,
-    a.secondary {
-        @apply bg-slate-100 shadow-[0_4px_0_0] !shadow-slate-200 disabled:opacity-70 dark:bg-gray-700/70 dark:!shadow-gray-800
+    .primary:not(:disabled) {
+        @apply hover:bg-sky-700 dark:hover:bg-sky-500
+    }
+
+    .secondary {
+        @apply ring-1 ring-slate-300 disabled:opacity-70 dark:bg-gray-800
+    }
+
+    .secondary:not(:disabled) {
+        @apply hover:bg-slate-100 dark:hover:bg-gray-700/60
+    }
+
+    .secondary:disabled {
+        @apply bg-slate-100
     }
 
     button:disabled,
     a:disabled {
-        @apply  cursor-not-allowed
+        @apply cursor-not-allowed
     }
+}
 
-    .text-slate-400 {
-        @apply dark:text-gray-500
-    }
+.text-slate-400 {
+    @apply dark:text-gray-500
+}
 
-    .text-sky-600 {
-        @apply dark:text-sky-500
-    }
+.text-sky-600 {
+    @apply dark:text-sky-500
+}
 
-    .text-red-600 {
-        @apply dark:text-red-500
-    }
+.text-red-600 {
+    @apply dark:text-red-500
+}
 
-    .text-green-600 {
-        @apply dark:text-green-500
-    }
+.text-green-600 {
+    @apply dark:text-green-500
+}
 
-    .font-bold, .font-semibold {
-        @apply dark:text-white
-    }
+.font-bold, .font-semibold {
+    @apply dark:text-white
+}
 
-    .bg-white {
-        @apply dark:bg-gray-900
-    }
+.bg-white {
+    @apply dark:bg-gray-900
+}
 
-    .bg-slate-100 {
-        @apply dark:bg-gray-800
-    }
+.bg-slate-100 {
+    @apply dark:bg-gray-800
+}
 
-    .bg-sky-50 {
-        @apply dark:bg-sky-900/30
-    }
+.bg-sky-50 {
+    @apply dark:bg-sky-900/30
+}
 
-    .divide-y, .divide-x {
-        @apply dark:divide-gray-600
-    }
+.divide-y, .divide-x {
+    @apply dark:divide-gray-600
+}
 
-    .ring-slate-300 {
-        @apply dark:ring-gray-600
-    }
+.ring-slate-300 {
+    @apply dark:ring-gray-700
+}
+
+.border-sky-600 {
+    @apply dark:border-sky-500
 }
 
 .subtitle {
     @apply text-xl font-bold tracking-[0]
+}
+
+.upload-button {
+    @apply cursor-pointer font-medium leading-[1.4rem] py-2 px-3 rounded-md ring-1 ring-slate-300 dark:bg-gray-800/70;
+    font-size: calc(1rem - 1px);
+}
+
+.upload-button:not(:disabled) {
+    @apply hover:bg-slate-100 dark:hover:bg-gray-800
+}
+
+.small-text {
+    font-size: calc(1rem - 1px);
+}
+
+.small-height {
+    height: calc(1.25rem - 1px);
+}
+
+.small-width {
+    width: calc(1.25rem - 1px);
 }

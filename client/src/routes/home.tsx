@@ -17,6 +17,7 @@ import {Link, useNavigate} from "react-router-dom"
 import FiltersIcon from "../icons/FiltersIcon";
 import PencilIcon from "../icons/PencilIcon";
 import Header from "../components/Header";
+import getCurrentUser from "../utilities/getCurrentUser";
 
 export default function Home() {
     type Filters = 'Date' | 'Impression' | 'Questions' | 'Responses' | 'Title'
@@ -38,6 +39,7 @@ export default function Home() {
     const [sortBy, setSortBy] = useState<Filters>('Date')
 
     const navigate = useNavigate()
+    const currentUser = getCurrentUser()
 
     useEffect(() => {
         retrieveQuizzes()
@@ -66,7 +68,6 @@ export default function Home() {
         setRetrievalError('')
         axios.get(`${process.env.REACT_APP_API_URL}/tests${(titleKeyword || (tags.length > 0)) ? '?' : ''}${titleKeyword ? `keyword=${titleKeyword}` : ''}${(titleKeyword && (tags.length > 0)) ? '&' : ''}${tags.length > 0 ? `tags=${JSON.stringify(tags)}` : ''}`)
             .then(response => {
-                console.log(response.data)
                 setQuizzes(response.data)
             })
             .catch(error => {
@@ -135,8 +136,8 @@ export default function Home() {
     return (
         <>
             <Header />
-            <FullScreenPopUp isVisible={isFiltersOpen} close={() => setIsFiltersOpen(false)} className='max-w-sm w-full p-10' >
-                <div className='space-y-7'>
+            <div className='m-auto container lg:max-w-screen-lg pt-40 pb-20 px-6 grid lg:grid-cols-[20rem_auto]'>
+                <div className='space-y-7 max-lg:border-b max-lg:pb-[3.25rem] max-lg:mb-[3.25rem] lg:border-r lg:pr-10 lg:mr-10'>
                     <h2 className='text-lg font-bold'>Filters</h2>
                     <div>
                         <label htmlFor='email' className='text-sm block mb-2'>Title</label>
@@ -151,26 +152,26 @@ export default function Home() {
                         <label htmlFor='email' className='text-sm block mb-2'>Tags</label>
                         <div className='flex flex-wrap gap-1.5'>
                             {tags.length > 0 && tags.map(tag => (
-                                <button onClick={() => setTags(tags.filter(item => item !== tag))} className='flex items-center space-x-1 border border-sky-600 text-sm p-1.5 pl-2.5 rounded uppercase text-sky-600 hover:bg-sky-50'>
+                                <button onClick={() => setTags(tags.filter(item => item !== tag))} className='flex items-center space-x-1 border border-sky-600 text-sm p-1.5 pl-2.5 rounded-md uppercase text-sky-600 hover:bg-sky-50'>
                                     <span>{tag}</span>
                                     <CrossIcon className='h-3.5 w-3.5' />
                                 </button>
                             ))}
-                            <button onClick={() => setIsTagMenuOpen(!isTagMenuOpen)} className={'flex items-center space-x-1 text-sm p-1.5 pl-2.5 rounded text-sky-600 border border-sky-600 hover:bg-sky-50 ' + (isTagMenuOpen ? 'bg-sky-50' : '')}>
+                            <button onClick={() => setIsTagMenuOpen(!isTagMenuOpen)} className={'flex items-center space-x-1 text-sm p-1.5 pl-2.5 rounded-md text-sky-600 border border-sky-600 hover:bg-sky-50 ' + (isTagMenuOpen ? 'bg-sky-50' : '')}>
                                 <span>ADD TAG</span>
                                 <CrossIcon className='h-3 w-3 rotate-45' />
                             </button>
                         </div>
                         {isTagMenuOpen && (
-                            <div className='absolute mt-2 max-w-32 bg-white border rounded-md p-2 shadow max-h-52 overflow-y-auto'>
-                                <div className='relative mb-2'>
+                            <div className='absolute mt-2 max-w-32 bg-white rounded-md p-2 pt-1 shadow-md max-h-52 overflow-y-auto dark:bg-gray-800'>
+                                <div className='relative'>
                                     <div className='absolute top-0 left-2.5 flex h-full'>
-                                        <GlassIcon className='h-3.5 w-3.5 my-auto' />
+                                        <GlassIcon className='h-3.5 w-3.5 my-auto text-slate-400' />
                                     </div>
-                                    <input type='text' value={tagKeyword} onChange={e => setTagKeyword(e.target.value)} className='!pl-8 rounded text-sm w-full' placeholder='Search' />
+                                    <input type='text' value={tagKeyword} onChange={e => setTagKeyword(e.target.value)} className='!pl-8 !ring-0 text-sm w-full' placeholder='Search' />
                                 </div>
                                 {filteredTags.length > 0 ? (filteredTags.map(tag => (
-                                    <button className='flex items-center justify-between w-full text-left py-1.5 px-2.5 text-sm capitalize rounded hover:bg-slate-100' onClick={() => {
+                                    <button className='flex items-center justify-between w-full text-left py-1.5 px-2.5 text-sm capitalize rounded hover:bg-slate-100 dark:hover:bg-gray-700/60' onClick={() => {
                                         if (tags.includes(tag)) setTags(tags.filter(t => t !== tag))
                                         else setTags([...tags, tag])
                                     }}>
@@ -188,71 +189,78 @@ export default function Home() {
                         <button onClick={resetFilters} className='secondary'>Reset</button>
                     </div>
                 </div>
-            </FullScreenPopUp>
-            <div className='m-auto container max-w-screen-md pt-40 pb-20 px-6'>
-                <div className='flex sm:items-end justify-between max-sm:flex-col-reverse'>
-                    {quizzes ? (
-                        <div className='max-sm:pt-4 text-sm text-slate-400'>{quizzes.length} quizzes found</div>
-                    ):(
-                        <div></div>
+                <div>
+                    <div className='flex sm:items-end justify-between max-sm:flex-col-reverse'>
+                        {quizzes ? (
+                            <div className='max-sm:pt-4 text-sm text-slate-400'>{quizzes.length} quizzes found</div>
+                        ):(
+                            <div></div>
+                        )}
+                        <div className='flex space-x-2'>
+                            <div ref={sortMenu} className='relative max-[480px]:w-full'>
+                                <button onClick={() => setIsSortMenuOpen(!isSortMenuOpen)} disabled={!quizzes} className={'secondary flex items-center justify-between max-[480px]:w-full min-[480px]:w-48 !pr-2 ' + (isSortMenuOpen ? 'bg-slate-100' : '')}>
+                                    <div>Sort by: <span className='font-bold'>{sortBy}</span></div>
+                                    <ArrowUpDown className='h-5 w-5' />
+                                </button>
+                                {isSortMenuOpen && (
+                                    <div className='absolute mt-2 w-full bg-white rounded-md p-2 shadow-md dark:bg-gray-800'>
+                                        {['Answers', 'Date', 'Questions', 'Responses', 'Title'].map(item => (
+                                            <button onClick={() => setSortBy(item as Filters)} className='flex items-center justify-between w-full text-left py-1.5 px-2.5 text-sm capitalize rounded hover:bg-slate-100 dark:hover:bg-gray-700/60'>
+                                                <span className={sortBy === item ? 'font-semibold' : ''}>{item}</span>
+                                                {sortBy === item && <CheckIcon className='h-4 w-4 text-sky-600' strokeWidth={2.5} />}
+                                            </button>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                            {currentUser && <Link to={'/quizzes/new'} className='h-fit primary shrink-0 max-sm:!px-2.5'>Add quiz</Link>}
+                        </div>
+                    </div>
+                    {quizzes && (
+                        quizzes.length > 0 ? (
+                            <div className='divide-y'>
+                                {sortedQuizzes.map((quiz, index) => (
+                                    <QuizBriefComponent quiz={quiz} key={index} />
+                                ))}
+                            </div>
+                        ):(
+                            <div className='mt-20 text-center max-w-md mx-auto'>
+                                <EmptyBox className='h-10 w-10 text-slate-400/60 mx-auto dark:text-gray-600' />
+                                <div className='mt-5 subtitle'>Nothing found</div>
+                                <p className='mt-3'>No quizzes found with the chosen criteria. Try modifying your filters to get different results.</p>
+                            </div>
+                        )
                     )}
-                    <div className='flex space-x-2'>
-                        <div ref={sortMenu} className='relative max-[480px]:w-full'>
-                            <button onClick={() => setIsSortMenuOpen(!isSortMenuOpen)} disabled={!quizzes} className={'secondary flex items-center justify-between max-[480px]:w-full min-[480px]:w-48 !pr-2 ' + (isSortMenuOpen ? 'bg-slate-100' : '')}>
-                                <div>Sort by: <span className='font-bold'>{sortBy}</span></div>
-                                <ArrowUpDown className='h-5 w-5' />
-                            </button>
-                            {isSortMenuOpen && (
-                                <div className='absolute mt-2 w-full bg-white border rounded-md p-2 shadow'>
-                                    {['Answers', 'Date', 'Questions', 'Responses', 'Title'].map(item => (
-                                        <button onClick={() => setSortBy(item as Filters)} className='flex items-center justify-between w-full text-left py-1.5 px-2.5 text-sm capitalize rounded hover:bg-slate-100'>
-                                            <span className={sortBy === item ? 'font-semibold' : ''}>{item}</span>
-                                            {sortBy === item && <CheckIcon className='h-4 w-4 text-sky-600' strokeWidth={2.5} />}
-                                        </button>
-                                    ))}
-                                </div>
-                            )}
-                        </div>
-                        <button onClick={() => setIsFiltersOpen(true)} className='h-fit secondary shrink-0 max-sm:!px-2.5'>
-                            <span className='max-[400px]:hidden'>Filters</span>
-                            <FiltersIcon className='min-[400px]:hidden h-5 w-5' />
-                        </button>
-                        <Link to={'/quizzes/new'} className='h-fit primary shrink-0 max-sm:!px-2.5'>
-                            <span className='max-[400px]:hidden'>Add quiz</span>
-                            <PencilIcon className='min-[400px]:hidden h-5 w-5' />
-                        </Link>
-                    </div>
-                </div>
-                {quizzes && (
-                    quizzes.length > 0 ? (
-                        <div className='divide-y'>
-                            {sortedQuizzes.map((quiz, index) => (
-                                <QuizBriefComponent quiz={quiz} key={index} />
-                            ))}
-                        </div>
-                    ):(
+                    {retrievalError && (
                         <div className='mt-20 text-center max-w-md mx-auto'>
-                            <EmptyBox className='h-10 w-10 text-slate-400/60 mx-auto dark:text-gray-600' />
-                            <div className='mt-5 subtitle'>Nothing found</div>
-                            <p className='mt-3'>No quizzes found with the chosen criteria. Try modifying your filters to get different results.</p>
+                            <CrossWithCircle className='h-10 w-10 text-slate-400/60 mx-auto dark:text-gray-600' />
+                            <div className='mt-5 subtitle'>Something failed</div>
+                            <p className='mt-3'>{retrievalError}</p>
+                            <button onClick={() => navigate(0)} className='mt-7 primary' >Retry</button>
                         </div>
-                    )
-                )}
-                {retrievalError && (
-                    <div className='mt-20 text-center max-w-md mx-auto'>
-                        <CrossWithCircle className='h-10 w-10 text-slate-400/60 mx-auto dark:text-gray-600' />
-                        <div className='mt-5 subtitle'>Something failed</div>
-                        <p className='mt-3'>{retrievalError}</p>
-                        <button onClick={() => navigate(0)} className='mt-7 primary' >Retry</button>
-                    </div>
-                )}
-                {!(quizzes || retrievalError) && (
-                    <div className='mt-20 text-center max-w-md mx-auto flex flex-col items-center'>
-                        <Spinner className='h-9 w-9 border-4 text-sky-600' />
-                        <div className='mt-5 subtitle'>Working...</div>
-                    </div>
-                )}
+                    )}
+                    {!(quizzes || retrievalError) && (
+                        <div className='mt-20 text-center max-w-md mx-auto flex flex-col items-center'>
+                            <Spinner className='h-9 w-9 border-4 text-sky-600' />
+                            <div className='mt-5 subtitle'>Working...</div>
+                        </div>
+                    )}
+                </div>
             </div>
         </>
     )
 }
+
+
+/*
+
+<button onClick={() => setIsFiltersOpen(true)} className='h-fit secondary shrink-0 max-sm:!px-2.5'>
+    <span className='max-[400px]:hidden'>Filters</span>
+    <FiltersIcon className='min-[400px]:hidden h-5 w-5' />
+</button>
+
+<PencilIcon className='min-[400px]:hidden h-5 w-5' />
+
+<FullScreenPopUp isVisible={isFiltersOpen} close={() => setIsFiltersOpen(false)} className='max-w-sm w-full p-10' ></FullScreenPopUp>
+
+*/

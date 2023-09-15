@@ -83,12 +83,21 @@ export default function QuizForm({quizInput}: {quizInput?: QuizWithQuestions}) {
             description: '',
             time_limit: ''
         }
+
         // validate inputs
         const { error } = validationSchema.validate({
             title: quiz.title,
             description: quiz.description,
             time_limit: quiz.time_limit
         }, { abortEarly: false })
+
+        // check if there are any questions
+        if (questions.length < 1) {
+            setOperationError('You need to add at least one question')
+            setTimeout(() => setOperationError(''), 3000)
+            return
+        }
+
         // proceed if no errors
         if (error) {
             error.details.forEach((detail) => {
@@ -172,18 +181,27 @@ export default function QuizForm({quizInput}: {quizInput?: QuizWithQuestions}) {
             <PopUp isVisible={!!operationError} msg={operationError} color='red' />
             <div className='space-y-6'>
                 <div>
-                    <label htmlFor='title' className='text-sm'>Title</label>
+                    <label htmlFor='title' className='text-sm'>Title <span className='text-red-600'>*</span></label>
                     <input type='text' name='title' id='title' className='mt-2 w-full' value={quiz.title} onChange={e => setQuiz({...quiz, title: e.target.value})} />
                     {formErrors.title && (
                         <div className="mt-2 text-red-600 text-sm first-letter:capitalize">{formErrors.title}</div>
                     )}
                 </div>
                 <div>
-                    <label htmlFor='description' className='text-sm'>Description</label>
-                    <textarea name='description' id='description' className='mt-2 w-full h-24' value={quiz.description} onChange={e => {
-                        handleTextareaResize(e)
-                        setQuiz({...quiz, description: e.target.value})
-                    }} />
+                    <label htmlFor='description' className='text-sm'>Description <span className='text-red-600'>*</span></label>
+                    <textarea
+                        name='description'
+                        id='description'
+                        className='mt-2 w-full h-24'
+                        value={quiz.description}
+                        onChange={e => {
+                            handleTextareaResize(e)
+                            setQuiz({...quiz, description: e.target.value})
+                        }}
+                        ref={e => {
+                            if (e) handleTextareaResize({ target: e })
+                        }}
+                    />
                     {formErrors.description && (
                         <div className="mt-2 text-red-600 text-sm first-letter:capitalize">{formErrors.description}</div>
                     )}
@@ -201,26 +219,26 @@ export default function QuizForm({quizInput}: {quizInput?: QuizWithQuestions}) {
                     <label htmlFor='email' className='text-sm block mb-2'>Tags</label>
                     <div className='flex flex-wrap gap-1.5'>
                         {quiz.tags.map(tag => (
-                            <button onClick={() => setTags(quiz.tags.filter(item => item !== tag))} className='flex items-center space-x-1 border border-sky-600 text-sm p-1.5 pl-2.5 rounded uppercase text-sky-600 hover:bg-sky-50'>
+                            <button onClick={() => setTags(quiz.tags.filter(item => item !== tag))} className='flex items-center space-x-1 border border-sky-600 text-sm p-1.5 pl-2.5 rounded-md uppercase text-sky-600 hover:bg-sky-50'>
                                 <span>{tag}</span>
                                 <CrossIcon className='h-3.5 w-3.5' />
                             </button>
                         ))}
-                        <button onClick={() => setIsTagMenuOpen(!isTagMenuOpen)} className={'flex items-center space-x-1 border border-sky-600 text-sm p-1.5 pl-2.5 rounded text-sky-600 hover:bg-sky-50 ' + (isTagMenuOpen ? 'bg-sky-50' : '')}>
+                        <button onClick={() => setIsTagMenuOpen(!isTagMenuOpen)} className={'flex items-center space-x-1 border border-sky-600 text-sm p-1.5 pl-2.5 rounded-md text-sky-600 hover:bg-sky-50 ' + (isTagMenuOpen ? 'bg-sky-50' : '')}>
                             <span>ADD TAG</span>
                             <CrossIcon className='h-3 w-3 rotate-45' />
                         </button>
                     </div>
                     {isTagMenuOpen && (
-                        <div className='absolute mt-2 max-w-32 bg-white border rounded-md p-2 shadow max-h-52 overflow-y-auto'>
-                            <div className='relative mb-2'>
+                        <div className='absolute mt-2 max-w-32 bg-white rounded-md p-2 pt-1 shadow-md max-h-52 overflow-y-auto dark:bg-gray-800'>
+                            <div className='relative'>
                                 <div className='absolute top-0 left-2.5 flex h-full'>
-                                    <GlassIcon className='h-3.5 w-3.5 my-auto' />
+                                    <GlassIcon className='h-3.5 w-3.5 my-auto text-slate-400' />
                                 </div>
-                                <input type='text' value={tagKeyword} onChange={e => setTagKeyword(e.target.value)} className='!pl-8 rounded text-sm w-full' placeholder='Search' />
+                                <input type='text' value={tagKeyword} onChange={e => setTagKeyword(e.target.value)} className='!pl-8 !ring-0 text-sm w-full' placeholder='Search' />
                             </div>
                             {tagKeyword && (
-                                <button className='w-full text-left py-1.5 px-2.5 text-sm rounded text-sky-600 hover:bg-slate-100' onClick={() => {
+                                <button className='w-full text-left py-1.5 px-2.5 text-sm text-sky-600 hover:bg-slate-100' onClick={() => {
                                     if (!quiz.tags.includes(tagKeyword)) {
                                         setTags([...quiz.tags, tagKeyword])
                                         setTagKeyword('')
@@ -230,7 +248,7 @@ export default function QuizForm({quizInput}: {quizInput?: QuizWithQuestions}) {
                             {allTags ? (
                                 (allTags.length > 0 ? (
                                     filteredTags!.length > 0 ? (filteredTags!.map(tag => (
-                                        <button className='flex items-center justify-between w-full text-left py-1.5 px-2.5 text-sm capitalize rounded hover:bg-slate-100' onClick={() => {
+                                        <button className='flex items-center justify-between w-full text-left py-1.5 px-2.5 text-sm capitalize rounded hover:bg-slate-100 dark:hover:bg-gray-700/60' onClick={() => {
                                             if (quiz.tags.includes(tag)) setTags(quiz.tags.filter(t => t !== tag))
                                             else setTags([...quiz.tags, tag])
                                         }}>
@@ -260,7 +278,7 @@ export default function QuizForm({quizInput}: {quizInput?: QuizWithQuestions}) {
                     <div className='mt-2 border-l pl-8 max-sm:pl-6'>
                         <h3 className='font-bold text-lg mb-6'>{addOrdinalIndicator(questions.length + 1)} question</h3>
                         <div>
-                            <label htmlFor='questionBody' className='text-sm block'>Content</label>
+                            <label htmlFor='questionBody' className='text-sm block'>Content <span className='text-red-600'>*</span></label>
                             <textarea name='questionBody' id='questionBody' className='mt-2 w-full h-18' value={questionBody} onChange={e => {
                                 handleTextareaResize(e)
                                 setQuestionBody(e.target.value)
@@ -269,11 +287,17 @@ export default function QuizForm({quizInput}: {quizInput?: QuizWithQuestions}) {
                         <div className='mt-8 border-l pl-8 max-sm:pl-6'>
                             <h3 className='font-bold text-lg mb-6'>{addOrdinalIndicator(choices.length + 1)} choice</h3>
                             <div>
-                                <label htmlFor='answerBody' className='text-sm block'>Content</label>
-                                <textarea name='answerBody' id='answerBody' className='mt-2 w-full h-18' value={choiceObject.body} onChange={e => {
-                                    handleTextareaResize(e)
-                                    setChoiceObject({...choiceObject, body: e.target.value})
-                                }} />
+                                <label htmlFor='answerBody' className='text-sm block'>Content <span className='text-red-600'>*</span></label>
+                                <textarea
+                                    name='answerBody'
+                                    id='answerBody'
+                                    className='mt-2 w-full h-18'
+                                    value={choiceObject.body}
+                                    onChange={e => {
+                                        handleTextareaResize(e)
+                                        setChoiceObject({...choiceObject, body: e.target.value})
+                                    }}
+                                />
                             </div>
                             <div onClick={() => setChoiceObject({...choiceObject, is_correct: !choiceObject.is_correct})} className='mt-6 flex items-center space-x-2 cursor-pointer'>
                                 <div className={'h-4 w-4 ring-1 ring-slate-300 rounded-sm flex items-center justify-center' + (choiceObject.is_correct ? ' bg-sky-600 !ring-sky-600 text-white' : '')}>

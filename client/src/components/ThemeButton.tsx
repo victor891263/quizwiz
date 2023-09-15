@@ -12,7 +12,7 @@ export default function ThemeButton({ className }: { className?: string }) {
     return (
         <button onClick={toggleTheme}>
             <SunIcon className={'dark:hidden h-5 w-5 ' + className} />
-            <MoonIcon className={'hidden dark:block h-[19px] w-[19px] ' + className} />
+            <MoonIcon className={'hidden dark:block h-[1.15rem] w-[1.15rem] ' + className} />
         </button>
     )
 }

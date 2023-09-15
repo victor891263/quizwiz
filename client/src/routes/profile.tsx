@@ -40,7 +40,6 @@ export default function Profile() {
     useEffect(() => {
         axios.get(`${process.env.REACT_APP_API_URL}/users/${userId}`)
             .then(response => {
-                console.log(response.data)
                 setProfile(response.data.user_details)
                 setQuizzes(response.data.quizzes)
             })
@@ -129,7 +128,7 @@ export default function Profile() {
                                     <div className='mt-0.5 text-slate-400'>@{profile.username}</div>
                                 </div>
                                 <div className='mt-7 space-y-2'>
-                                    <div className='flex items-center space-x-2.5'>
+                                    <div className='flex items-center space-x-2'>
                                         <CalendarIcon className='h-5 w-5' />
                                         <div>Joined on {new Date(profile.created_on).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' })}</div>
                                     </div>
@@ -141,9 +140,9 @@ export default function Profile() {
                                     )}
                                 </div>
                                 {profile.about ? (
-                                    <p className='mt-7 italic'>{profile.about}</p>
+                                    <p className='mt-7'>{profile.about}</p>
                                 ):(
-                                    <p className='mt-7 italic'>This user hasn't added an introduction yet.</p>
+                                    <p className='mt-7'>This user hasn't added an introduction yet.</p>
                                 )}
                             </div>
                         </div>
@@ -156,9 +155,9 @@ export default function Profile() {
                                         <ArrowUpDown className='h-5 w-5' />
                                     </button>
                                     {isSortMenuOpen && (
-                                        <div className='absolute mt-2 w-full bg-white border rounded-md p-2 shadow'>
+                                        <div className='absolute mt-2 w-full bg-white rounded-md p-2 shadow-md dark:bg-gray-800'>
                                             {['Date', 'Impression', 'Questions', 'Responses', 'Title'].map(item => (
-                                                <button onClick={() => setSortBy(item as Filters)} className='flex items-center justify-between w-full text-left py-1.5 px-2.5 text-sm capitalize rounded hover:bg-slate-100'>
+                                                <button onClick={() => setSortBy(item as Filters)} className='flex items-center justify-between w-full text-left py-1.5 px-2.5 text-sm capitalize rounded hover:bg-slate-100 dark:hover:bg-gray-700/60'>
                                                     <span className={sortBy === item ? 'font-semibold' : ''}>{item}</span>
                                                     {sortBy === item && <CheckIcon className='h-4 w-4 text-sky-600' strokeWidth={2.5} />}
                                                 </button>

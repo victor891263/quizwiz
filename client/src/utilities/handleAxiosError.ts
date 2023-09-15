@@ -1,6 +1,6 @@
 export default function handleAxiosError(error: any, callback: (msg: string) => void, timeout?: boolean) {
     if (error.response) {
-        if (error.response.data.includes('<pre>')) {
+        if (error.response.data && (typeof error.response.data === 'string') && error.response.data.includes('<pre>')) {
             callback(extractMsg(error.response.data))
         } else {
             callback(error.response.data)

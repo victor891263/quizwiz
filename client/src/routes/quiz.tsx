@@ -22,6 +22,7 @@ import Comment from "../components/Comment";
 import PencilIcon from "../icons/PencilIcon";
 import TrashIcon from "../icons/TrashIcon";
 import Header from "../components/Header";
+import UserIcon from "../icons/UserIcon";
 
 export default function QuizComponent() {
     const [quiz, setQuiz] = useState<Quiz>()
@@ -41,7 +42,6 @@ export default function QuizComponent() {
     useEffect(() => {
         axios.get(`${process.env.REACT_APP_API_URL}/tests/${quizId}`, {headers: {Authorization: `Bearer ${getToken()}`}})
             .then(response => {
-                console.log(response.data)
                 setQuiz(response.data)
             })
             .catch(error => {
@@ -95,8 +95,10 @@ export default function QuizComponent() {
 
     async function deleteQuiz() {
         setIsDeleting(true)
+        console.log('triggered', isDeleting)
         try {
             await axios.delete(`${process.env.REACT_APP_API_URL}/tests/${quizId}`, {headers: {Authorization: `Bearer ${getToken()}`}})
+            navigate('/')
         } catch (error) {
             handleAxiosError(error, (msg: string) => {
                 setOperationError(msg)
@@ -104,6 +106,7 @@ export default function QuizComponent() {
             })
         }
         setIsDeleting(false)
+        console.log('done', isDeleting)
     }
 
     async function reactToComment(e: any, commentId: string, type: 'like' | 'dislike') {
@@ -141,8 +144,8 @@ export default function QuizComponent() {
     }
 
     async function deleteComment(e:any, commentId: string) {
+        e.target.disabled = true
         try {
-            e.target.disabled = true
             await axios.delete(`${process.env.REACT_APP_API_URL}/tests/${quizId}/comments/${commentId}`, {headers: {Authorization: `Bearer ${getToken()}`}})
             navigate(0)
         } catch (error) {
@@ -183,7 +186,7 @@ export default function QuizComponent() {
                             </div>
                         )}
                         <h1 className='text-3xl font-bold tracking-[0]'>{quiz.title}</h1>
-                        <div className='flex gap-x-4 italic'>
+                        <div className='flex gap-x-4'>
                             <div><span className='font-semibold'>{quiz.questions}</span> questions</div>
                             <div><span className='font-semibold'>{quiz.responses}</span> responses</div>
                         </div>
@@ -196,7 +199,7 @@ export default function QuizComponent() {
                         <p className='text-lg leading-[1.65] whitespace-break-spaces'>{quiz.description}</p>
                         <div className='pt-2.5 pb-3 flex flex-wrap gap-2'>
                             {quiz.tags.map((tag, index) => (
-                                <div className='border border-slate-300 rounded py-1.5 px-2.5 text-slate-400 uppercase' key={index}>{tag}</div>
+                                <div className='bg-slate-100 rounded-md py-1.5 px-2.5 text-slate-400 uppercase' key={index}>{tag}</div>
                             ))}
                         </div>
                         <div className='flex gap-x-4 italic'>
@@ -216,8 +219,8 @@ export default function QuizComponent() {
                             )}
                             {(!!quiz.blocked_users.find(u => u.$oid === currentUser._id)) && (
                                 <div className='pt-11 mt-11 border-t'>
-                                    <div className='bg-slate-100 p-4 pr-5 text-slate-500 rounded flex items-center space-x-2.5'>
-                                        <ExclaimationIcon className='h-[18px] w-[18px]' />
+                                    <div className='bg-slate-100 p-4 pr-5 text-slate-500 rounded-lg flex space-x-2.5'>
+                                        <div className='pt-0.5'><ClockIcon className='h-5 w-5' /></div>
                                         <span className='font-medium tracking-[-0.005em]'>You failed to complete this test in time. You cannot retake.</span>
                                     </div>
                                 </div>
@@ -231,8 +234,8 @@ export default function QuizComponent() {
                     )}
                     {(!currentUser) && (
                         <div className='pt-11 mt-11 border-t'>
-                            <div className='bg-slate-100 p-4 pr-5 text-slate-500 rounded flex items-center space-x-2.5'>
-                                <ExclaimationIcon className='h-[18px] w-[18px]' />
+                            <div className='bg-slate-100 p-4 pr-5 text-slate-500 rounded-lg flex space-x-2.5'>
+                                <div className='pt-0.5'><UserIcon className='h-5 w-5' /></div>
                                 <span className='font-medium tracking-[-0.005em]'>Only logged in users can take the quiz.</span>
                             </div>
                         </div>
@@ -244,11 +247,11 @@ export default function QuizComponent() {
                                     <Link to={`/quizzes/${quizId}/responses`} className='secondary' >View responses</Link>
                                     <Link to={`/quizzes/${quizId}/edit`} className='secondary' >
                                         <span className='max-[440px]:hidden'>Edit quiz</span>
-                                        <div className='min-[440px]:hidden h-full w-full flex items-center justify-center'><PencilIcon className='h-[18px] w-[18px]' /></div>
+                                        <div className='min-[440px]:hidden h-full w-full flex items-center justify-center'><PencilIcon className='small-height small-width' /></div>
                                     </Link>
-                                    <button onClick={deleteQuiz} disabled={isDeleting} className='relative secondary text-red-600 disabled:!text-transparent'>
-                                        <span className='max-[440px]:hidden'>Delete quiz</span>
-                                        <div className='min-[440px]:hidden h-full w-full flex items-center justify-center'><TrashIcon className='h-[18px] w-[18px]' /></div>
+                                    <button onClick={deleteQuiz} disabled={isDeleting} className='relative secondary'>
+                                        <span className={'max-[440px]:hidden ' + (isDeleting ? 'text-transparent' : 'text-red-600')}>Delete quiz</span>
+                                        <div className={'min-[440px]:hidden h-full w-full flex items-center justify-center ' + (isDeleting ? 'text-transparent' : 'text-red-600')}><TrashIcon className='h-[18px] w-[18px]' /></div>
                                         {isDeleting && (
                                             <div className='absolute top-0 left-0 h-full w-full flex items-center justify-center'>
                                                 <Spinner className='h-5 w-5 border-[3px] text-slate-500' />
@@ -267,12 +270,12 @@ export default function QuizComponent() {
                                     >
                                         {quiz.liked_users.find(u => u.$oid === currentUser._id) ? (
                                             <>
-                                                <LikeIcon fill={true} className='w-5 h-5' />
+                                                <LikeIcon fill={true} className='w-4 h-4 rotate-180 scale-x-[-1]' />
                                                 <span className='font-semibold'>Liked</span>
                                             </>
                                         ):(
                                             <>
-                                                <LikeIcon className='w-5 h-5' />
+                                                <LikeIcon className='w-4 h-4 rotate-180 scale-x-[-1]' />
                                                 <span>Like</span>
                                             </>
                                         )}
@@ -284,12 +287,12 @@ export default function QuizComponent() {
                                     >
                                         {quiz.disliked_users.find(u => u.$oid === currentUser._id) ? (
                                             <>
-                                                <DislikeIcon fill={true} className='w-5 h-5' />
+                                                <LikeIcon fill={true} className='w-4 h-4' />
                                                 <span className='font-semibold'>Disliked</span>
                                             </>
                                         ):(
                                             <>
-                                                <DislikeIcon className='w-5 h-5' />
+                                                <LikeIcon className='w-4 h-4' />
                                                 <span>Dislike</span>
                                             </>
                                         )}
@@ -306,7 +309,7 @@ export default function QuizComponent() {
                                     handleTextareaResize(e)
                                     setCommentBody(e.target.value)
                                 }} />
-                                <div className='absolute bottom-4 right-3.5'>
+                                <div className='absolute bottom-2.5 right-2.5'>
                                     <button onClick={submitComment} disabled={isLoading} className='ml-auto relative block primary disabled:text-transparent'>
                                         <span>Post</span>
                                         {isLoading && (
@@ -319,8 +322,8 @@ export default function QuizComponent() {
                                 <div className='absolute bottom-2.5 left-3.5 text-sm text-slate-400'>{commentBody.length}/500</div>
                             </div>
                         ):(
-                            <div className='bg-slate-100 p-4 pr-5 text-slate-500 rounded-lg flex items-center space-x-2.5'>
-                                <ExclaimationIcon className='h-[18px] w-[18px]' />
+                            <div className='bg-slate-100 p-4 pr-5 text-slate-500 rounded-lg flex space-x-2.5'>
+                                <div className='pt-0.5'><UserIcon className='h-5 w-5' /></div>
                                 <span className='font-medium tracking-[-0.005em]'>Only logged in users can post a comment</span>
                             </div>
                         )}

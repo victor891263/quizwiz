@@ -4,6 +4,7 @@ from flask_cors import CORS
 import mongoengine
 from dotenv import load_dotenv
 import jwt
+import cloudinary
 from flask_mail import Mail
 
 # import routes
@@ -20,6 +21,13 @@ DATABASE_URI = os.environ['DATABASE_URI']
 JWT_SECRET = os.environ['JWT_SECRET']
 SMTP_PASSWORD = os.environ['SMTP_PASSWORD']
 CLIENT_URL = os.environ['CLIENT_URL']
+
+# configure cloudinary
+cloudinary.config(
+    cloud_name = os.environ['CLOUDINARY_CLOUD_NAME'],
+    api_key = os.environ['CLOUDINARY_API_KEY'],
+    api_secret = os.environ['CLOUDINARY_API_SECRET'],
+)
 
 # initialize API
 app = Flask(__name__)

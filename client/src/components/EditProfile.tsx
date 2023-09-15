@@ -9,6 +9,8 @@ import getToken from "../utilities/getToken"
 import CrossIcon from "../icons/CrossIcon"
 import MailIcon from "../icons/MailIcon"
 import Spinner from "../icons/Spinner"
+import AvatarIcon from "../icons/AvatarIcon"
+import getFileString from "../utilities/getFileString";
 
 type Props = {
     profile: User
@@ -29,7 +31,8 @@ export default function EditProfile({ profile, updateDetails, updateNewEmail, cl
         name: Joi.string().min(0).max(50),
         username: Joi.string().min(1).max(50).required(),
         about: Joi.string().min(0).max(300),
-        link: Joi.string().min(0).max(50)
+        link: Joi.string().min(0).max(50),
+        img: Joi.optional()
     })
     const emailSchema = Joi.object({
         newEmail: Joi.string().email({ tlds: { allow: false } }).min(1).max(50).required()
@@ -43,12 +46,16 @@ export default function EditProfile({ profile, updateDetails, updateNewEmail, cl
         name: profile.name,
         username: profile.username,
         about: profile.about,
-        link: profile.link
+        link: profile.link,
+        img: profile.img
     })
     const [currentEmail, setCurrentEmail] = useState(profile.email.address)
     const [newEmail, setNewEmail] = useState(profile.new_email.address || '')
     const [currentPassword, setCurrentPassword] = useState('')
     const [newPassword, setNewPassword] = useState('')
+
+    const [newImg, setNewImg] = useState<File>()
+    const [readerError, setReaderError] = useState('')
 
     const [detailsErrors, setDetailsErrors] = useState({
         name: '',
@@ -87,19 +94,42 @@ export default function EditProfile({ profile, updateDetails, updateNewEmail, cl
             })
         } else {
             setIsLoading(true)
+
+            // this will become a base64 string
+            let newImgString: string | undefined = undefined
+
+            if (newImg) {
+                // create a base64 string out of the image
+                try {
+                    newImgString = await getFileString(newImg)
+                } catch (error) {
+                    setReaderError('Failed to process the selected image')
+                    setTimeout(() => setReaderError(''), 3000)
+                    setIsLoading(false)
+                    return
+                }
+            }
+
+            // submit the changes made to the profile
             try {
                 await axios.put(`${process.env.REACT_APP_API_URL}/users`, {
                     // empty strings have to be replaced with undefined because for optional fields, whose type is string, the API throws an error if a field is an empty string
-                    username: details.username,
-                    name: details.name || undefined,
-                    about: details.about || undefined,
-                    link: details.link || undefined,
-                    updated_on: new Date().getTime()
-                }, {headers: {Authorization: `Bearer ${getToken()}`}})
-                updateDetails(details)
+                    newData: {
+                        username: details.username,
+                        name: details.name || undefined,
+                        about: details.about || undefined,
+                        link: details.link || undefined,
+                        img: details.img || undefined,
+                        updated_on: new Date().getTime()
+                    },
+                    newImg: newImgString
+                }, {
+                    headers: { Authorization: `Bearer ${getToken()}` }
+                })
                 setSuccess('Your details has been updated successfully')
                 setTimeout(() => setSuccess(''), 3000)
                 setIsLoading(false)
+                navigate(0)
             }
             catch (error) {
                 handleAxiosError(error, (msg: string) => {
@@ -181,13 +211,11 @@ export default function EditProfile({ profile, updateDetails, updateNewEmail, cl
         setIsLoading(true)
         try {
             await axios.delete(`${process.env.REACT_APP_API_URL}/users`, {headers: {Authorization: `Bearer ${getToken()}`}})
-            setSuccess('Your account has been deleted successfully. Logging you out now')
-            setTimeout(() => {
-                setSuccess('')
-                localStorage.removeItem('jwt') // logout
-                navigate('/') // redirect to home page
-            }, 3000)
             setIsLoading(false)
+            setSuccess('Your account has been deleted successfully. Logging you out now')
+            setTimeout(() => setSuccess(''), 3000)
+            localStorage.removeItem('jwt') // logout
+            navigate('/') // redirect to home page
         }
         catch (error) {
             handleAxiosError(error, (msg: string) => {
@@ -229,14 +257,41 @@ export default function EditProfile({ profile, updateDetails, updateNewEmail, cl
             </div>
             {showing === 'details' && (
                 <>
+                    <div className='flex space-x-4'>
+                        {details.img ? (
+                            <img src={details.img} className='h-16 w-16 rounded-full' />
+                        ):(
+                            <AvatarIcon className='h-16 w-16 text-slate-400/50' />
+                        )}
+                        <div>
+                            {newImg ? (
+                                <button onClick={() => setNewImg(undefined)} className='secondary'>Remove</button>
+                            ):(
+                                <div>
+                                    <input id='new-img-selector' type='file' accept='image/*' onChange={e => setNewImg(e.target.files![0])} className='hidden'  />
+                                    <label htmlFor='new-img-selector' className='upload-button block w-fit'>Select</label>
+                                </div>
+                            )}
+                            <div className='mt-2 text-xs text-slate-400 line-clamp-1'>{newImg ? newImg.name : 'No file selected'}</div>
+                        </div>
+                    </div>
                     {Object.keys(details).map(item => ((item === 'name') || (item === 'username') || (item === 'about') || (item === 'link')) && (
                         <div>
                             <label htmlFor={item} className='text-sm capitalize'>{item}</label>
                             {item === 'about' ? (
-                                <textarea className='mt-2 w-full h-32' name={item} id={item} value={details[item]} onChange={e => {
-                                    setDetails({...details, [item]: e.target.value})
-                                    handleTextareaResize(e)
-                                }} />
+                                <textarea
+                                    className='mt-2 w-full h-32'
+                                    name={item}
+                                    id={item}
+                                    value={details[item]}
+                                    onChange={e => {
+                                        setDetails({...details, [item]: e.target.value})
+                                        handleTextareaResize(e)
+                                    }}
+                                    ref={e => {
+                                        if (e) handleTextareaResize({ target: e })
+                                    }}
+                                />
                             ):(
                                 <input className='mt-2 w-full' type='text' name={item} id={item} value={details[item]} onChange={e => setDetails({...details, [item]: e.target.value})} />
                             )}

@@ -54,10 +54,11 @@ export default function Questions() {
         if (answers.length !== quizWithQuestions!.questions.length) {
             setOperationError('You need to answer every question')
             setTimeout(() => setOperationError(''), 3000)
+            return
         }
         setIsLoading(true)
         try {
-            await axios.put(`${process.env.REACT_APP_API_URL}/tests/${quizId}/responses`, {answers, elapsed_time: convertTimeLabelToMinutes(timeLabel), created_on: new Date().getTime(), updated_on: new Date().getTime()}, {headers: {Authorization: `Bearer ${getToken()}`}})
+            await axios.put(`${process.env.REACT_APP_API_URL}/tests/${quizId}/responses`, {answers, elapsed_time: convertTimeLabelToMinutes(timeLabel), created_on: new Date().getTime()}, {headers: {Authorization: `Bearer ${getToken()}`}})
             navigate(`/quizzes/${quizId}/results`)
         } catch (error) {
             handleAxiosError(error, (msg: string) => {
@@ -126,13 +127,13 @@ export default function Questions() {
                                 </div>
                                 {timeLabel && (
                                     <div className='flex items-center space-x-1.5'>
-                                        <ClockIcon className='h-[18px] w-[18px]' />
+                                        <ClockIcon className='small-height small-width' />
                                         <div>{timeLabel}</div>
                                     </div>
                                 )}
                             </div>
                             <div className='mb-1.5 text-slate-400 text-sm font-semibold'>{questionIds!.indexOf(currentQuestion._id.$oid) + 1}/{quizWithQuestions.questions.length}</div>
-                            <p className='italic'>{currentQuestion.title}</p>
+                            <p>{currentQuestion.title}</p>
                             <div className='mt-8 space-y-3.5'>
                                 {currentQuestion.options.map((option, index) => (
                                     <div onClick={() => pickChoice(option._id.$oid, currentQuestion._id.$oid)} className='flex space-x-3 cursor-pointer '>
