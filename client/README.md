@@ -1,43 +1,57 @@
-# Getting Started with Create React App
+# Quizwiz - Front-end
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
-## Available Scripts
+## Run on your local machine
 
-In the project directory, you can run:
+Before you begin, make sure you have the following prerequisites installed on your system:
 
-### `npm start`
+- **Node.js**: Make sure you have Node.js installed on your system. You can download it from the [official Node.js website](https://nodejs.org/).
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+To run the front-end on your local machine, follow these steps:
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+1. **Clone the repository:**
 
-### `npm test`
+    ```
+    git clone https://github.com/victor891263/quizwiz.git .
+    cd client
+    ```
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+2. **Install dependencies:**
 
-### `npm run build`
+    ```
+    npm install
+    ```
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+3. **Configure environment variables:**
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+    Create a `.env.local` file in the root directory and specify the API endpoint.
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+4. **Run tests:**
 
-### `npm run eject`
+    ```
+    npm test
+    ```
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+    Launches the test runner in the interactive watch mode. View the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+5. **Start the development server:**
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+    ```
+    npm start
+    ```
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
+    Open your web browser and navigate to `http://localhost:3000` to view the app. Now you have the front-end running locally on your machine. The page will reload if you make edits. You will also see any lint errors in the console.
+
+## Building
+
+Run the following command to build the app for production to the `build` folder.
+
+```
+npm run build
+```
+
+It correctly bundles the front-end in production mode and optimizes the build for the best performance and deployment-ready. See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
 
 ## Learn More
 
